@@ -89,16 +89,16 @@ export default function Analyze() {
             if (files.equifax) formData.append('equifax', files.equifax);
             if (files.transunion) formData.append('transunion', files.transunion);
 
-            // Use the Supabase edge function URL from environment
-            const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-            const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+            // NOTE: In Lovable/Vite, this endpoint needs to point to your Supabase Edge Function
+            const SUPABASE_FUNCTION_URL = (import.meta as any).env?.VITE_SUPABASE_FUNCTION_URL || '/functions/v1/analyze-report';
+            // For now, this will likely fail locally without the backend setup. 
+            // You should update this URL to your deployed Supabase function.
 
-            const response = await fetch(`${SUPABASE_URL}/functions/v1/analyze-report`, {
+            const response = await fetch(SUPABASE_FUNCTION_URL, {
                 method: 'POST',
                 body: formData,
-                headers: {
-                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                }
+                // headers can be handled automatically if using supabase-js invoke, but for raw fetch:
+                // headers: { Authorization: `Bearer ${...}` }
             });
 
             if (!response?.ok) {
