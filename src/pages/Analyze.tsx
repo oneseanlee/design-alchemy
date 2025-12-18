@@ -90,7 +90,7 @@ export default function Analyze() {
             if (files.transunion) formData.append('transunion', files.transunion);
 
             // NOTE: In Lovable/Vite, this endpoint needs to point to your Supabase Edge Function
-            const SUPABASE_FUNCTION_URL = import.meta.env.VITE_SUPABASE_FUNCTION_URL || '/functions/v1/analyze-report';
+            const SUPABASE_FUNCTION_URL = (import.meta as any).env?.VITE_SUPABASE_FUNCTION_URL || '/functions/v1/analyze-report';
             // For now, this will likely fail locally without the backend setup. 
             // You should update this URL to your deployed Supabase function.
 
