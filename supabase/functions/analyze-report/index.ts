@@ -84,42 +84,61 @@ serve(async (req) => {
       throw new Error('No credit report files provided');
     }
 
-    const systemPrompt = `You are an expert credit report analyst. Analyze the provided credit report PDF(s) and identify FCRA violations and issues.
+    const systemPrompt = `You are an expert FCRA (Fair Credit Reporting Act) and FDCPA (Fair Debt Collection Practices Act) violation analyst. 
 
-CRITICAL: Keep your response CONCISE. Limit arrays to maximum 10 items each. Use short descriptions.
+Your task is to analyze the provided Annual Credit Report PDF(s) and identify ALL potential FCRA violations and account errors.
 
-Return a JSON object with this structure:
+CRITICAL INSTRUCTIONS:
+1. These are Annual Credit Reports from AnnualCreditReport.com - they do NOT contain credit scores or income information. Do not try to calculate or estimate these.
+2. Focus ENTIRELY on identifying FCRA violations, reporting errors, and account discrepancies.
+3. For EVERY violation found, provide a SPECIFIC, ACTIONABLE suggested action (e.g., "Send a certified dispute letter to [Bureau] citing 15 U.S.C. § 1681i demanding removal/correction of [specific item]").
+4. Be thorough - look for duplicate accounts, incorrect balances, outdated information, accounts that should have fallen off, identity errors, etc.
+
+Return a JSON object with EXACTLY this structure:
 {
-  "creditScore": {
-    "current": number or null,
-    "range": "Poor/Fair/Good/Excellent",
-    "factors": ["max 3 short factors"]
+  "reportSummary": {
+    "reportDate": "string (date found in report or 'Not specified')",
+    "consumerName": "string (name from report)",
+    "totalAccountsAnalyzed": number,
+    "fileSource": "TransUnion/Equifax/Experian or combination"
   },
-  "paymentHistory": {
-    "onTimePayments": number,
-    "latePayments": number,
-    "missedPayments": number,
-    "totalAccounts": number,
-    "percentageOnTime": number
-  },
-  "creditUtilization": {
-    "totalCredit": number,
-    "usedCredit": number,
-    "utilizationPercentage": number,
-    "recommendation": "short recommendation"
-  },
-  "accounts": [{"name": "string", "type": "string", "balance": number, "status": "string", "potentialViolation": "string or null"}],
-  "fcraViolations": [{"violationType": "string", "severity": "High/Medium/Low", "accountName": "string", "issue": "short description", "legalBasis": "short basis"}],
-  "recommendations": [{"priority": "High/Medium/Low", "title": "string", "description": "short description"}],
-  "legalCaseSummary": {
-    "totalViolationsFound": number,
-    "highPriorityViolations": number,
-    "estimatedCompensationPotential": "string",
+  "accountAnalysis": [
+    {
+      "accountName": "string (creditor name)",
+      "accountNumber": "string (last 4 digits only, e.g., '****1234')",
+      "status": "string (Open/Closed/Derogatory/Collection/etc.)",
+      "balance": "string (reported balance or 'Not reported')",
+      "comments": "string (any issues or notes about this account)"
+    }
+  ],
+  "fcraViolations": [
+    {
+      "violationTitle": "string (e.g., 'Double Jeopardy Reporting', 'Outdated Negative Information', 'Inaccurate Balance Reporting')",
+      "severity": "High/Medium/Low",
+      "accountsInvolved": ["array of account names involved"],
+      "legalBasis": "string (specific statute, e.g., '15 U.S.C. § 1681s-2(a)(1)(A) - Duty to provide accurate information')",
+      "explanation": "string (Clear, detailed explanation of why this is a violation and how it harms the consumer)",
+      "suggestedAction": "string (Step-by-step instruction, e.g., 'Step 1: Draft a certified dispute letter. Step 2: Send to [Bureau] at [address]. Step 3: Include copies of supporting documents. Step 4: Request deletion under 15 U.S.C. § 1681i.')"
+    }
+  ],
+  "legalSummary": {
+    "totalViolations": number,
     "attorneyReferralRecommended": boolean,
-    "nextSteps": "short next steps"
+    "estimatedDamagesPotential": "Low/Moderate/Significant"
   },
-  "summary": "2-3 sentence summary"
-}`;
+  "summary": "string (2-3 sentence overall assessment focusing on violations found and recommended actions)"
+}
+
+Common FCRA violations to look for:
+- Duplicate/double jeopardy reporting (same debt reported multiple times)
+- Outdated negative information (derogatory items older than 7 years, bankruptcies older than 10 years)
+- Inaccurate account information (wrong balances, payment history, dates)
+- Accounts not belonging to the consumer (identity mix-up)
+- Incorrect personal information (name, address, SSN variations)
+- Re-aging of accounts (resetting the 7-year clock)
+- Failure to report disputes
+- Collection accounts with incomplete information
+- Unauthorized hard inquiries`;
 
     console.log('Sending request to Google Gemini API with', bureauNames.length, 'PDF files...');
     
@@ -134,11 +153,11 @@ Return a JSON object with this structure:
           // Build the parts array: system prompt first, then PDF files with labels
           const parts = [
             { text: systemPrompt },
-            { text: `Please analyze the following ${bureauNames.length} credit report(s) from: ${bureauNames.join(', ')}.` },
+            { text: `Please analyze the following ${bureauNames.length} Annual Credit Report(s) from: ${bureauNames.join(', ')}. Focus on identifying FCRA violations and account errors.` },
             ...fileParts
           ];
 
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'processing', progress: 30, message: 'Analyzing credit reports with AI...' })}\n\n`));
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'processing', progress: 30, message: 'Analyzing credit reports for FCRA violations...' })}\n\n`));
 
           // Use Google Gemini API with multimodal PDF support
           const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
@@ -191,7 +210,7 @@ Return a JSON object with this structure:
             throw new Error('No content in Gemini response');
           }
 
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'processing', progress: 80, message: 'Parsing analysis results...' })}\n\n`));
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'processing', progress: 80, message: 'Parsing violation analysis...' })}\n\n`));
 
           // Parse the JSON response with robust error handling
           let analysisResult;
@@ -211,7 +230,6 @@ Return a JSON object with this structure:
             const closeBrackets = (content.match(/\]/g) || []).length;
             
             // Try to close unclosed strings, arrays, and objects
-            // Remove trailing incomplete string if present
             repairedContent = repairedContent.replace(/,\s*"[^"]*$/, '');
             repairedContent = repairedContent.replace(/,\s*$/, '');
             
@@ -230,19 +248,25 @@ Return a JSON object with this structure:
               console.error('JSON repair failed:', repairError);
               // Return a minimal valid result
               analysisResult = {
-                summary: "Analysis completed but response was truncated. Please try again with fewer reports or contact support.",
-                creditScore: { current: null, range: "Unknown", factors: [] },
-                paymentHistory: { onTimePayments: 0, latePayments: 0, missedPayments: 0, totalAccounts: 0, percentageOnTime: 0 },
-                creditUtilization: { totalCredit: 0, usedCredit: 0, utilizationPercentage: 0, recommendation: "Unable to analyze" },
-                accounts: [],
+                reportSummary: {
+                  reportDate: "Unknown",
+                  consumerName: "Unknown",
+                  totalAccountsAnalyzed: 0,
+                  fileSource: bureauNames.join('/')
+                },
+                accountAnalysis: [],
                 fcraViolations: [],
-                recommendations: [],
-                legalCaseSummary: { totalViolationsFound: 0, highPriorityViolations: 0, estimatedCompensationPotential: "Unknown", attorneyReferralRecommended: false, nextSteps: "Please retry the analysis" }
+                legalSummary: {
+                  totalViolations: 0,
+                  attorneyReferralRecommended: false,
+                  estimatedDamagesPotential: "Unknown"
+                },
+                summary: "Analysis completed but response was truncated. Please try again or contact support."
               };
             }
           }
 
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'processing', progress: 95, message: 'Finalizing report...' })}\n\n`));
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'processing', progress: 95, message: 'Finalizing violation report...' })}\n\n`));
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'completed', result: analysisResult })}\n\n`));
           controller.enqueue(encoder.encode('data: [DONE]\n\n'));
           controller.close();
