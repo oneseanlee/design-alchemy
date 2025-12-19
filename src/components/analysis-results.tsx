@@ -134,27 +134,27 @@ export default function AnalysisResults({ results, onReset }: AnalysisResultsPro
             </div>
             <div className="flex flex-col justify-center">
               <div className="space-y-4">
-                <div className="flex justify-between items-center p-4 bg-green-50 rounded-lg">
-                  <span className="font-medium text-neutral-200">On-Time Payments</span>
-                  <span className="text-2xl font-bold text-green-400">
+                <div className="flex justify-between items-center p-4 bg-green-100 rounded-lg border border-green-300">
+                  <span className="font-medium text-green-800">On-Time Payments</span>
+                  <span className="text-2xl font-bold text-green-700">
                     {results?.paymentHistory?.onTimePayments ?? 0}
                   </span>
                 </div>
-                <div className="flex justify-between items-center p-4 bg-yellow-50 rounded-lg">
-                  <span className="font-medium text-neutral-200">Late Payments</span>
-                  <span className="text-2xl font-bold text-yellow-400">
+                <div className="flex justify-between items-center p-4 bg-yellow-100 rounded-lg border border-yellow-300">
+                  <span className="font-medium text-yellow-800">Late Payments</span>
+                  <span className="text-2xl font-bold text-yellow-700">
                     {results?.paymentHistory?.latePayments ?? 0}
                   </span>
                 </div>
-                <div className="flex justify-between items-center p-4 bg-red-50 rounded-lg">
-                  <span className="font-medium text-neutral-200">Missed Payments</span>
-                  <span className="text-2xl font-bold text-red-400">
+                <div className="flex justify-between items-center p-4 bg-red-100 rounded-lg border border-red-300">
+                  <span className="font-medium text-red-800">Missed Payments</span>
+                  <span className="text-2xl font-bold text-red-700">
                     {results?.paymentHistory?.missedPayments ?? 0}
                   </span>
                 </div>
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-neutral-300">Payment Success Rate</p>
-                  <p className="text-3xl font-bold text-rose-500">
+                <div className="p-4 bg-blue-100 rounded-lg border border-blue-300">
+                  <p className="text-sm text-blue-700">Payment Success Rate</p>
+                  <p className="text-3xl font-bold text-blue-800">
                     {results?.paymentHistory?.percentageOnTime?.toFixed?.(1) ?? 0}%
                   </p>
                 </div>
@@ -193,25 +193,25 @@ export default function AnalysisResults({ results, onReset }: AnalysisResultsPro
               </ResponsiveContainer>
             </div>
             <div className="flex flex-col justify-center space-y-4">
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <p className="text-sm text-neutral-300 mb-1">Total Credit Available</p>
+              <div className="p-4 bg-neutral-800 rounded-lg border border-neutral-700">
+                <p className="text-sm text-neutral-400 mb-1">Total Credit Available</p>
                 <p className="text-2xl font-bold text-neutral-100">
                   ${results?.creditUtilization?.totalCredit?.toLocaleString?.() ?? '0'}
                 </p>
               </div>
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm text-neutral-300 mb-1">Credit Used</p>
-                <p className="text-2xl font-bold text-rose-500">
+              <div className="p-4 bg-blue-100 rounded-lg border border-blue-300">
+                <p className="text-sm text-blue-700 mb-1">Credit Used</p>
+                <p className="text-2xl font-bold text-blue-800">
                   ${results?.creditUtilization?.usedCredit?.toLocaleString?.() ?? '0'}
                 </p>
               </div>
-              <div className="p-4 bg-purple-50 rounded-lg">
-                <p className="text-sm text-neutral-300 mb-1">Utilization Rate</p>
-                <p className="text-2xl font-bold text-purple-600">
+              <div className="p-4 bg-purple-100 rounded-lg border border-purple-300">
+                <p className="text-sm text-purple-700 mb-1">Utilization Rate</p>
+                <p className="text-2xl font-bold text-purple-800">
                   {results?.creditUtilization?.utilizationPercentage?.toFixed?.(1) ?? 0}%
                 </p>
               </div>
-              <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+              <div className="p-4 bg-green-100 rounded-lg border border-green-300">
                 <p className="text-sm font-semibold text-green-800 mb-1">Recommendation</p>
                 <p className="text-sm text-green-700">{results?.creditUtilization?.recommendation ?? 'N/A'}</p>
               </div>
@@ -227,7 +227,7 @@ export default function AnalysisResults({ results, onReset }: AnalysisResultsPro
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-neutral-800">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-neutral-200">Account</th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-neutral-200">Type</th>
@@ -237,12 +237,12 @@ export default function AnalysisResults({ results, onReset }: AnalysisResultsPro
                   <th className="px-4 py-3 text-left text-sm font-semibold text-neutral-200">Violation Check</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-neutral-700">
                 {(results?.accounts ?? [])?.slice?.(0, 20)?.map?.((account: any, idx: number) => (
-                  <tr key={idx} className={`hover:bg-gray-50 ${
+                  <tr key={idx} className={`hover:bg-neutral-800/50 ${
                     (account?.potentialViolation && account?.potentialViolation !== 'None') || 
                     (account?.crossBureauDiscrepancy && account?.crossBureauDiscrepancy !== 'None')
-                      ? 'bg-red-50'
+                      ? 'bg-red-900/30'
                       : ''
                   }`}>
                     <td className="px-4 py-3 text-sm text-neutral-100">
@@ -345,19 +345,19 @@ export default function AnalysisResults({ results, onReset }: AnalysisResultsPro
             <h2 className="text-2xl font-bold text-neutral-100">Debt-to-Income Ratio</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="p-6 bg-indigo-50 rounded-xl">
-              <p className="text-sm text-neutral-300 mb-2">Estimated Monthly Debt</p>
-              <p className="text-3xl font-bold text-indigo-600">
+            <div className="p-6 bg-indigo-100 rounded-xl border border-indigo-300">
+              <p className="text-sm text-indigo-700 mb-2">Estimated Monthly Debt</p>
+              <p className="text-3xl font-bold text-indigo-800">
                 ${results?.debtToIncome?.estimatedMonthlyDebt?.toLocaleString?.() ?? '0'}
               </p>
             </div>
-            <div className="p-6 bg-purple-50 rounded-xl">
-              <p className="text-sm text-neutral-300 mb-2">DTI Ratio</p>
-              <p className="text-3xl font-bold text-purple-600">{results?.debtToIncome?.ratio ?? 'N/A'}</p>
+            <div className="p-6 bg-purple-100 rounded-xl border border-purple-300">
+              <p className="text-sm text-purple-700 mb-2">DTI Ratio</p>
+              <p className="text-3xl font-bold text-purple-800">{results?.debtToIncome?.ratio ?? 'N/A'}</p>
             </div>
-            <div className="p-6 bg-blue-50 rounded-xl">
-              <p className="text-sm text-neutral-300 mb-2">Assessment</p>
-              <p className="text-lg font-semibold text-rose-500">{results?.debtToIncome?.assessment ?? 'N/A'}</p>
+            <div className="p-6 bg-blue-100 rounded-xl border border-blue-300">
+              <p className="text-sm text-blue-700 mb-2">Assessment</p>
+              <p className="text-lg font-semibold text-blue-800">{results?.debtToIncome?.assessment ?? 'N/A'}</p>
             </div>
           </div>
         </div>
