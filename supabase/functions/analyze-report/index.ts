@@ -21,6 +21,11 @@ const corsHeaders = {
 const RATE_LIMIT_WINDOW_MINUTES = 60;
 const RATE_LIMIT_MAX_REQUESTS = 5;
 
+// Max payload size: 10MB
+const MAX_PAYLOAD_SIZE = 10 * 1024 * 1024; // 10,485,760 bytes
+// Max file size per upload: 5MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5,242,880 bytes
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -29,6 +34,19 @@ serve(async (req) => {
 
   try {
     console.log('Analyze report function called');
+    
+    // === INPUT VALIDATION: Check Content-Length header ===
+    const contentLength = req.headers.get('content-length');
+    if (contentLength) {
+      const payloadSize = parseInt(contentLength, 10);
+      if (payloadSize > MAX_PAYLOAD_SIZE) {
+        console.warn(`Payload too large: ${payloadSize} bytes (max: ${MAX_PAYLOAD_SIZE})`);
+        return new Response(
+          JSON.stringify({ error: 'Payload Too Large', code: 413 }),
+          { status: 413, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
     
     // === ORIGIN CHECK ===
     const origin = req.headers.get('origin');
@@ -66,12 +84,25 @@ serve(async (req) => {
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
       console.error('GEMINI_API_KEY is not configured');
-      throw new Error('Gemini API key not configured');
+      // Don't expose which config is missing to the client
+      return new Response(
+        JSON.stringify({ error: 'Internal Server Error', code: 500 }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // Initialize Supabase admin client (service role)
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Supabase configuration missing');
+      return new Response(
+        JSON.stringify({ error: 'Internal Server Error', code: 500 }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     // === RATE LIMITING CHECK ===
@@ -115,6 +146,23 @@ serve(async (req) => {
     const equifaxFile = formData.get('equifax') as File | null;
     const transunionFile = formData.get('transunion') as File | null;
     
+    // === INPUT VALIDATION: Check individual file sizes ===
+    const files = [
+      { name: 'experian', file: experianFile },
+      { name: 'equifax', file: equifaxFile },
+      { name: 'transunion', file: transunionFile }
+    ];
+    
+    for (const { name, file } of files) {
+      if (file && file.size > MAX_FILE_SIZE) {
+        console.warn(`File ${name} too large: ${file.size} bytes (max: ${MAX_FILE_SIZE})`);
+        return new Response(
+          JSON.stringify({ error: `File ${name} exceeds maximum size of 5MB`, code: 413 }),
+          { status: 413, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+    
     // Get lead data
     const leadName = formData.get('leadName') as string | null;
     const leadEmail = formData.get('leadEmail') as string | null;
@@ -136,9 +184,10 @@ serve(async (req) => {
         });
       
       if (leadError) {
+        // Log error but don't expose details to client
         console.error('Failed to save lead:', leadError);
       } else {
-        console.log('Lead saved successfully:', { name: leadName, email: leadEmail, ip: clientIP });
+        console.log('Lead saved successfully');
       }
     }
 
@@ -157,7 +206,7 @@ serve(async (req) => {
       });
       fileParts.push({ text: "The above PDF is the EXPERIAN credit report." });
       bureauNames.push('Experian');
-      console.log(`Experian file converted to base64, size: ${base64Data.length} chars`);
+      console.log(`Experian file processed, size: ${experianFile.size} bytes`);
     }
     
     if (equifaxFile) {
@@ -171,7 +220,7 @@ serve(async (req) => {
       });
       fileParts.push({ text: "The above PDF is the EQUIFAX credit report." });
       bureauNames.push('Equifax');
-      console.log(`Equifax file converted to base64, size: ${base64Data.length} chars`);
+      console.log(`Equifax file processed, size: ${equifaxFile.size} bytes`);
     }
     
     if (transunionFile) {
@@ -185,11 +234,14 @@ serve(async (req) => {
       });
       fileParts.push({ text: "The above PDF is the TRANSUNION credit report." });
       bureauNames.push('TransUnion');
-      console.log(`TransUnion file converted to base64, size: ${base64Data.length} chars`);
+      console.log(`TransUnion file processed, size: ${transunionFile.size} bytes`);
     }
 
     if (fileParts.length === 0) {
-      throw new Error('No credit report files provided');
+      return new Response(
+        JSON.stringify({ error: 'No credit report files provided', code: 400 }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const systemPrompt = `You are an expert FCRA (Fair Credit Reporting Act) and FDCPA (Fair Debt Collection Practices Act) violation analyst. 
@@ -248,7 +300,7 @@ Common FCRA violations to look for:
 - Collection accounts with incomplete information
 - Unauthorized hard inquiries`;
 
-    console.log('Sending request to Google Gemini API with', bureauNames.length, 'PDF files...');
+    console.log('Sending request to Gemini API with', bureauNames.length, 'PDF files...');
     
     // Send streaming updates to client
     const encoder = new TextEncoder();
@@ -290,17 +342,19 @@ Common FCRA violations to look for:
 
           if (!response.ok) {
             const errorText = await response.text();
+            // Log full error for debugging
             console.error('Gemini API error:', response.status, errorText);
             
+            // Return sanitized error to client
             if (response.status === 429) {
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'error', message: 'Rate limit exceeded. Please try again later.' })}\n\n`));
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'error', message: 'Service temporarily unavailable. Please try again later.' })}\n\n`));
             } else if (response.status === 403) {
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'error', message: 'Invalid API key or access denied.' })}\n\n`));
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'error', message: 'Service configuration error. Please contact support.' })}\n\n`));
             } else if (response.status === 400) {
               console.error('Bad request - check PDF format or size');
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'error', message: 'Error processing PDF files. Please ensure files are valid PDFs.' })}\n\n`));
             } else {
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'error', message: `Gemini API error: ${response.status}` })}\n\n`));
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'error', message: 'An error occurred while processing your request. Please try again.' })}\n\n`));
             }
             controller.close();
             return;
@@ -314,8 +368,10 @@ Common FCRA violations to look for:
           // Extract content from Gemini response format
           const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
           if (!content) {
-            console.error('Unexpected Gemini response structure:', JSON.stringify(data));
-            throw new Error('No content in Gemini response');
+            console.error('Unexpected Gemini response structure:', JSON.stringify(data).substring(0, 500));
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'error', message: 'Failed to process response. Please try again.' })}\n\n`));
+            controller.close();
+            return;
           }
 
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'processing', progress: 80, message: 'Parsing violation analysis...' })}\n\n`));
@@ -379,9 +435,11 @@ Common FCRA violations to look for:
           controller.enqueue(encoder.encode('data: [DONE]\n\n'));
           controller.close();
           
-        } catch (error) {
-          console.error('Stream error:', error);
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'error', message: error instanceof Error ? error.message : 'Analysis failed' })}\n\n`));
+        } catch (streamError) {
+          // Log full error for debugging
+          console.error('Stream error:', streamError instanceof Error ? streamError.stack : streamError);
+          // Return sanitized error to client
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'error', message: 'An error occurred while processing your request. Please try again.' })}\n\n`));
           controller.close();
         }
       }
@@ -397,10 +455,12 @@ Common FCRA violations to look for:
     });
 
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Error:', errorMessage);
+    // Log full error details for debugging (visible in edge function logs)
+    console.error('Unhandled error:', error instanceof Error ? error.stack : error);
+    
+    // Return sanitized error to client - never expose internal details
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: 'Internal Server Error', code: 500 }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
