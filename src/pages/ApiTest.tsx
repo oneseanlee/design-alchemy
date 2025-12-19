@@ -65,7 +65,7 @@ const ApiTest = () => {
     setCurrentResponse("");
     startTimeRef.current = Date.now();
 
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co`;
+    const supabaseUrl = "https://viotepfhdproajmntrfp.supabase.co";
     
     try {
       const response = await fetch(
