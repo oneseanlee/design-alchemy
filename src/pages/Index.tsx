@@ -26,8 +26,8 @@ export default function Index() {
             {/* Central Pulse */}
             <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-[150px] animate-pulse-burst pointer-events-none -z-10" />
 
-            {/* Header - Dark Glass */}
-            <header className="fixed top-0 left-0 right-0 z-50 glass-dark">
+            {/* Header - White Background */}
+            <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-neutral-200/50 shadow-sm">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <img
@@ -39,7 +39,7 @@ export default function Index() {
                         />
                     </div>
                     <Link to="/analyze">
-                        <button className="btn-pill-sm bg-foreground text-background hover:bg-foreground/90 btn-glow-white">
+                        <button className="btn-pill-sm bg-primary text-primary-foreground hover:bg-primary/90 btn-glow">
                             Analyze Report
                         </button>
                     </Link>
