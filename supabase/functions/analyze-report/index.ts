@@ -12,13 +12,17 @@ const ALLOWED_ORIGINS = [
   // Add your custom domain when you have one
 ];
 
-// Function to check if origin is allowed (includes *.lovableproject.com pattern)
+// Function to check if origin is allowed (includes *.lovableproject.com and *.lovable.app patterns)
 function isOriginAllowed(origin: string | null): boolean {
   if (!origin) return false;
   // Check exact matches
   if (ALLOWED_ORIGINS.some(allowed => origin.startsWith(allowed))) return true;
   // Check lovableproject.com wildcard pattern
   if (origin.match(/^https:\/\/[a-z0-9-]+\.lovableproject\.com$/)) return true;
+  // Check lovable.app wildcard pattern (includes preview domains)
+  if (origin.match(/^https:\/\/[a-z0-9-]+\.lovable\.app$/)) return true;
+  // Check id-preview pattern
+  if (origin.match(/^https:\/\/id-preview--[a-z0-9-]+\.lovable\.app$/)) return true;
   return false;
 }
 
