@@ -171,30 +171,32 @@
 .laser-grid {
   position: absolute;
   inset: 0;
-  background-size: 80px 80px;
+  background-size: 60px 60px;
   background-image:
-    linear-gradient(to right, hsl(0 0% 100% / 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, hsl(0 0% 100% / 0.03) 1px, transparent 1px);
-  mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
+    linear-gradient(to right, hsl(330 100% 55% / 0.12) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(330 100% 55% / 0.12) 1px, transparent 1px);
+  mask-image: radial-gradient(ellipse at center, black 50%, transparent 85%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 50%, transparent 85%);
 }
 
 .laser-line-h {
   position: absolute;
   left: 0;
   right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, hsl(var(--primary)), transparent);
-  animation: laser-h 8s linear infinite;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, hsl(330 100% 55% / 0.9) 50%, transparent 100%);
+  box-shadow: 0 0 20px 3px hsl(330 100% 55% / 0.5);
+  animation: laser-h 6s ease-in-out infinite;
 }
 
 .laser-line-v {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 1px;
-  background: linear-gradient(180deg, transparent, hsl(var(--primary)), transparent);
-  animation: laser-v 10s linear infinite;
+  width: 2px;
+  background: linear-gradient(180deg, transparent 0%, hsl(330 100% 55% / 0.9) 50%, transparent 100%);
+  box-shadow: 0 0 20px 3px hsl(330 100% 55% / 0.5);
+  animation: laser-v 8s ease-in-out infinite;
 }
 
 /* Glow effect */
