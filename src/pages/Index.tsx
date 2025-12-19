@@ -34,29 +34,44 @@ export default function Index() {
             </header>
 
             {/* Hero Section */}
-            <section className="pt-32 pb-24 px-6">
-                <div className="max-w-7xl mx-auto text-center">
+            <section className="relative pt-32 pb-24 px-6 min-h-[90vh] flex items-center overflow-hidden">
+                {/* Video Background */}
+                <div className="absolute inset-0 -z-10">
+                    <video
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover"
+                    >
+                        <source src="/videos/hero-background.mp4" type="video/mp4" />
+                    </video>
+                    {/* Dark overlay for text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
+                </div>
+
+                <div className="max-w-7xl mx-auto text-center relative z-10">
                     <div className="animate-reveal">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full border border-primary/30 bg-primary/10">
-                            <div className="status-dot bg-primary" />
-                            <span className="text-primary font-medium text-sm">100% FREE Credit Analysis Tool</span>
+                        <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full border border-white/30 bg-white/10 backdrop-blur-sm">
+                            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                            <span className="text-white font-medium text-sm">100% FREE Credit Analysis Tool</span>
                         </div>
                     </div>
                     
-                    <h1 className="animate-reveal-delay-1 text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-[1.1] tracking-tight">
+                    <h1 className="animate-reveal-delay-1 text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-[1.1] tracking-tight text-white">
                         Get a Complete Credit
                         <br />
-                        <span className="gradient-text-primary">Analysis in Minutes</span>
+                        <span className="bg-gradient-to-r from-primary via-primary to-accent-coral bg-clip-text text-transparent">Analysis in Minutes</span>
                     </h1>
                     
-                    <p className="animate-reveal-delay-2 text-lg sm:text-xl text-muted-foreground font-light max-w-3xl mx-auto mb-8 leading-relaxed">
+                    <p className="animate-reveal-delay-2 text-lg sm:text-xl text-white/80 font-light max-w-3xl mx-auto mb-8 leading-relaxed">
                         Upload your credit reports and receive instant AI-powered insights, personalized recommendations, and a comprehensive breakdown of your credit health - plus automatic FCRA violation detection
                     </p>
                     
                     <div className="animate-reveal-delay-2 flex flex-wrap justify-center gap-3 mb-10">
-                        <span className="px-4 py-1.5 rounded-full bg-primary/15 text-primary border border-primary/30 text-sm font-medium">Experian</span>
-                        <span className="px-4 py-1.5 rounded-full bg-info/15 text-info border border-info/30 text-sm font-medium">Equifax</span>
-                        <span className="px-4 py-1.5 rounded-full bg-success/15 text-success border border-success/30 text-sm font-medium">TransUnion</span>
+                        <span className="px-4 py-1.5 rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-sm text-sm font-medium">Experian</span>
+                        <span className="px-4 py-1.5 rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-sm text-sm font-medium">Equifax</span>
+                        <span className="px-4 py-1.5 rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-sm text-sm font-medium">TransUnion</span>
                     </div>
                     
                     <div className="animate-reveal-delay-3 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -66,13 +81,13 @@ export default function Index() {
                             </button>
                         </Link>
                         <Link to="/analyze">
-                            <button className="btn-pill border border-border bg-transparent text-foreground hover:bg-card-hover font-medium">
+                            <button className="btn-pill border border-white/30 bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 font-medium transition-all">
                                 Learn More
                             </button>
                         </Link>
                     </div>
                     
-                    <p className="animate-reveal-delay-3 text-sm text-muted-foreground mt-6">
+                    <p className="animate-reveal-delay-3 text-sm text-white/60 mt-6">
                         Upload reports from all 3 bureaus for the most comprehensive analysis
                     </p>
                 </div>
