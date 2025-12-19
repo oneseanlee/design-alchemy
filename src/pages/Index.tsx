@@ -93,6 +93,31 @@ export default function Index() {
                 </div>
             </section>
 
+            {/* How It Works */}
+            <section className="py-24 px-6 section-border">
+                <div className="max-w-7xl mx-auto">
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-center mb-4 tracking-tight">How It Works</h2>
+                    <p className="text-center text-muted-foreground mb-16 max-w-2xl mx-auto font-light text-lg">
+                        Simple three-step process to get your complete credit analysis
+                    </p>
+                    <div className="grid md:grid-cols-3 gap-10 max-w-5xl mx-auto">
+                        {[
+                            { step: '1', title: 'Upload Your Reports', desc: 'Upload your credit reports from all 3 bureaus in PDF format for the most comprehensive analysis' },
+                            { step: '2', title: 'AI Analysis', desc: 'Our AI analyzes your credit health, score factors, accounts, and automatically checks for FCRA violations' },
+                            { step: '3', title: 'Get Your Results', desc: 'Receive detailed recommendations, improvement strategies, and next steps to fix your credit' }
+                        ].map((item) => (
+                            <div key={item.step} className="text-center">
+                                <div className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-6 bg-primary text-primary-foreground shadow-glow">
+                                    {item.step}
+                                </div>
+                                <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
+                                <p className="text-muted-foreground font-light">{item.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
             {/* Features */}
             <section className="py-24 px-6 section-border">
                 <div className="max-w-7xl mx-auto">
@@ -321,30 +346,6 @@ export default function Index() {
                 </div>
             </section>
 
-            {/* How It Works */}
-            <section className="py-24 px-6 section-border">
-                <div className="max-w-7xl mx-auto">
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-center mb-4 tracking-tight">How It Works</h2>
-                    <p className="text-center text-muted-foreground mb-16 max-w-2xl mx-auto font-light text-lg">
-                        Simple three-step process to get your complete credit analysis
-                    </p>
-                    <div className="grid md:grid-cols-3 gap-10 max-w-5xl mx-auto">
-                        {[
-                            { step: '1', title: 'Upload Your Reports', desc: 'Upload your credit reports from all 3 bureaus in PDF format for the most comprehensive analysis' },
-                            { step: '2', title: 'AI Analysis', desc: 'Our AI analyzes your credit health, score factors, accounts, and automatically checks for FCRA violations' },
-                            { step: '3', title: 'Get Your Results', desc: 'Receive detailed recommendations, improvement strategies, and next steps to fix your credit' }
-                        ].map((item) => (
-                            <div key={item.step} className="text-center">
-                                <div className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-6 bg-primary text-primary-foreground shadow-glow">
-                                    {item.step}
-                                </div>
-                                <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
-                                <p className="text-muted-foreground font-light">{item.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
 
             {/* Usage Instructions */}
             <section className="py-24 px-6">
