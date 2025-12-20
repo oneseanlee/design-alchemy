@@ -142,101 +142,105 @@ export default function FreeEbook() {
             
             {/* Left Column - Book Cover */}
             <div className="flex items-center justify-center">
-              <div className="relative">
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary via-destructive to-primary rounded-xl blur-sm opacity-75 group-hover:opacity-100 transition-opacity animate-pulse" />
                 <img 
                   src={ebookCover} 
                   alt="How to Turn Credit Report Errors Into Compensation" 
-                  className="w-64 md:w-72 lg:w-80 rounded-lg shadow-2xl shadow-primary/30"
+                  className="relative w-80 md:w-96 lg:w-[420px] rounded-lg border-2 border-primary shadow-2xl shadow-primary/50"
                 />
-                <div className="absolute -top-3 -right-3 bg-destructive text-destructive-foreground px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wide">
+                <div className="absolute -top-4 -right-4 bg-destructive text-destructive-foreground px-5 py-2 rounded-full text-sm font-bold uppercase tracking-wide shadow-lg">
                   Free
                 </div>
               </div>
             </div>
 
             {/* Right Column - Content & Form */}
-            <div className="flex flex-col justify-center space-y-6">
-              {/* Bullet Points */}
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <span className="text-primary mt-1">✓</span>
-                  <span className="text-muted-foreground">Learn which FCRA violations qualify for <span className="text-foreground font-medium">$1,000+</span> in statutory damages</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-primary mt-1">✓</span>
-                  <span className="text-muted-foreground">Understand why Equifax, TransUnion, and Experian make so many mistakes</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-primary mt-1">✓</span>
-                  <span className="text-muted-foreground">Follow a step-by-step process to dispute errors and file claims</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-primary mt-1">✓</span>
-                  <span className="text-muted-foreground">Get instant results from our <span className="text-foreground font-medium">free AI-powered</span> credit report scanner</span>
-                </li>
-              </ul>
+            <div className="flex flex-col justify-center">
+              {/* Compelling Signup Card */}
+              <div className="bg-gradient-to-br from-destructive/90 to-primary/90 rounded-2xl p-8 space-y-6 border border-primary/50 shadow-2xl shadow-primary/30">
+                <div className="text-center space-y-2">
+                  <h2 className="text-2xl md:text-3xl font-bold text-white">
+                    Claim Your FREE Guide
+                  </h2>
+                  <p className="text-white/90">
+                    Join 10,000+ consumers who discovered hidden violations
+                  </p>
+                </div>
 
-              {/* Form Card */}
-              <div className="glass-panel-strong rounded-2xl p-6 space-y-5">
+                {/* Bullet Points */}
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <span className="text-white font-bold mt-0.5">✓</span>
+                    <span className="text-white/90">Learn which FCRA violations qualify for <span className="text-white font-semibold">$1,000+</span> in damages</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-white font-bold mt-0.5">✓</span>
+                    <span className="text-white/90">Step-by-step process to dispute errors and file claims</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-white font-bold mt-0.5">✓</span>
+                    <span className="text-white/90">Get instant results from our <span className="text-white font-semibold">free AI scanner</span></span>
+                  </li>
+                </ul>
+
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <Input
-                      type="text"
-                      placeholder="Your name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="h-12 bg-background/50"
-                      disabled={isSubmitting}
-                    />
-                    <Input
-                      type="email"
-                      placeholder="Your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="h-12 bg-background/50"
-                      disabled={isSubmitting}
-                    />
-                  </div>
+                  <Input
+                    type="text"
+                    placeholder="Your name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="h-14 bg-white text-background placeholder:text-background/60 border-0 text-lg font-medium"
+                    disabled={isSubmitting}
+                  />
+                  <Input
+                    type="email"
+                    placeholder="Your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="h-14 bg-white text-background placeholder:text-background/60 border-0 text-lg font-medium"
+                    disabled={isSubmitting}
+                  />
                   <Button 
                     type="submit" 
-                    className="w-full h-12 text-lg font-semibold btn-glow"
+                    className="w-full h-14 text-xl font-bold bg-background hover:bg-background/90 text-primary"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
                       <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        <Loader2 className="w-6 h-6 mr-2 animate-spin" />
                         Processing...
                       </>
                     ) : (
                       <>
-                        Get My Free Guide Now
-                        <ArrowRight className="w-5 h-5 ml-2" />
+                        Get Instant Access
+                        <ArrowRight className="w-6 h-6 ml-2" />
                       </>
                     )}
                   </Button>
                 </form>
 
                 {/* Trust badges */}
-                <div className="flex justify-center gap-6 text-sm text-muted-foreground pt-2">
+                <div className="flex justify-center gap-6 text-sm text-white/80">
                   <div className="flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-primary" />
+                    <BookOpen className="w-4 h-4" />
                     <span>Free eBook</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Scan className="w-4 h-4 text-primary" />
+                    <Scan className="w-4 h-4" />
                     <span>AI Scan</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CreditCard className="w-4 h-4 text-primary" />
+                    <CreditCard className="w-4 h-4" />
                     <span>No Card</span>
                   </div>
                 </div>
-              </div>
 
-              {/* Author credit */}
-              <p className="text-sm text-muted-foreground">
-                By <span className="text-foreground font-medium">Ken Lamothe</span>, FCRA Expert
-              </p>
+                {/* Author credit */}
+                <p className="text-center text-sm text-white/70">
+                  By <span className="text-white font-medium">Ken Lamothe</span>, FCRA Expert
+                </p>
+              </div>
             </div>
           </div>
         </div>
