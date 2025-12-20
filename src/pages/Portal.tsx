@@ -93,7 +93,7 @@ export default function Portal() {
   const progressPercent = (completedSteps / steps.length) * 100;
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen relative">
       {/* Video Background */}
       <video
         src="https://files.revneo.com/red2.mp4"
@@ -104,7 +104,7 @@ export default function Portal() {
         playsInline
       />
       {/* Header */}
-      <header className="py-4 px-6 border-b border-border">
+      <header className="py-4 px-6 border-b border-white/10 bg-black/30 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link to="/">
             <img src={carcLogo} alt="CARC Logo" className="h-10 w-auto" />
