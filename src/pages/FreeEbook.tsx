@@ -117,7 +117,7 @@ export default function FreeEbook() {
         <source src="/videos/red5-background.mp4" type="video/mp4" />
       </video>
       {/* Dark overlay for readability */}
-      <div className="absolute inset-0 bg-background/80 z-[1]" />
+      <div className="absolute inset-0 bg-background/60 z-[1]" />
       
       <main className="relative z-10 min-h-screen flex flex-col justify-center px-4 py-12">
         <div className="w-full max-w-5xl mx-auto animate-reveal">
