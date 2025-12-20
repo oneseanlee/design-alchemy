@@ -157,7 +157,7 @@ export default function FreeEbook() {
           <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
             
             {/* Left Column - Book Cover */}
-            <div className="flex items-center justify-center">
+            <div className="flex flex-col items-center justify-center gap-6">
               <div className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary via-destructive to-primary rounded-xl blur-sm opacity-75 group-hover:opacity-100 transition-opacity animate-pulse" />
                 <img 
@@ -169,14 +169,10 @@ export default function FreeEbook() {
                   Free
                 </div>
               </div>
-            </div>
-
-            {/* Right Column - Content & Form */}
-            <div className="flex flex-col justify-center">
-              {/* Compelling Signup Card */}
-              <div className="bg-gradient-to-br from-destructive/90 to-primary/90 rounded-2xl p-8 space-y-6 border border-primary/50 shadow-2xl shadow-primary/30">
-                {/* Urgency Timer */}
-                <div className="bg-background/20 rounded-lg p-3 flex items-center justify-center gap-3">
+              
+              {/* Urgency Timer */}
+              <div className="w-full max-w-sm bg-gradient-to-r from-destructive/90 to-primary/90 rounded-xl p-4 border border-primary/50 shadow-xl shadow-primary/30">
+                <div className="flex items-center justify-center gap-3">
                   <Clock className="w-5 h-5 text-white animate-pulse" />
                   <span className="text-white font-medium">Offer expires in:</span>
                   <div className="flex gap-1 font-mono font-bold text-white text-xl">
@@ -185,6 +181,13 @@ export default function FreeEbook() {
                     <span className="bg-background/30 px-2 py-1 rounded">{String(timeLeft.seconds).padStart(2, '0')}</span>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Right Column - Content & Form */}
+            <div className="flex flex-col justify-center">
+              {/* Compelling Signup Card */}
+              <div className="bg-gradient-to-br from-destructive/90 to-primary/90 rounded-2xl p-8 space-y-6 border border-primary/50 shadow-2xl shadow-primary/30">
 
                 <div className="text-center space-y-2">
                   <h2 className="text-2xl md:text-3xl font-bold text-white">
