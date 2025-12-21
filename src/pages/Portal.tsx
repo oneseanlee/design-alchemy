@@ -108,7 +108,7 @@ export default function Portal() {
       <SettlementsBanner />
       
       {/* Header */}
-      <header className="sticky top-0 z-40 py-4 px-6 border-b border-border bg-background shadow-sm">
+      <header className="sticky top-0 z-40 py-4 px-6 border-b border-border bg-white shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link to="/">
             <img src={carcLogo} alt="CARC Logo" className="h-10 w-auto" />
