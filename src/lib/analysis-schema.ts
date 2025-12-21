@@ -109,6 +109,51 @@ export const analysisResultSchema = z.object({
   // Debt Buyer Specific Issues
   debtBuyerIssues: z.array(debtBuyerIssueSchema).optional(),
 
+  // Priority Violations - The 6 key violation types
+  priorityViolations: z.object({
+    duplicateAccounts: z.array(z.object({
+      originalCreditor: looseString.optional(),
+      collectionAgency: looseString.optional(),
+      accountNumber: looseString.optional(),
+      originalBalance: looseString.optional(),
+      collectionBalance: looseString.optional(),
+      explanation: looseString.optional(),
+    })).optional(),
+    identityTheftAccounts: z.array(z.object({
+      accountName: looseString.optional(),
+      accountNumber: looseString.optional(),
+      reason: looseString.optional(),
+      dateOpened: looseString.optional(),
+    })).optional(),
+    wrongBalanceAccounts: z.array(z.object({
+      accountName: looseString.optional(),
+      reportedBalance: looseString.optional(),
+      shouldBe: looseString.optional(),
+      status: looseString.optional(),
+      explanation: looseString.optional(),
+    })).optional(),
+    postBankruptcyViolations: z.array(z.object({
+      accountName: looseString.optional(),
+      reportedBalance: looseString.optional(),
+      reportedPayment: looseString.optional(),
+      reportedPastDue: looseString.optional(),
+      bankruptcyDischargeDate: looseString.optional(),
+      explanation: looseString.optional(),
+    })).optional(),
+    cancelledDebt1099C: z.array(z.object({
+      accountName: looseString.optional(),
+      reportedBalance: looseString.optional(),
+      chargeOffDate: looseString.optional(),
+      explanation: looseString.optional(),
+    })).optional(),
+    tcpaViolations: z.array(z.object({
+      collectorName: looseString.optional(),
+      violationType: looseString.optional(),
+      evidence: looseString.optional(),
+      estimatedCalls: looseNumber.optional(),
+    })).optional(),
+  }).optional(),
+
   // Generated Dispute Letters
   suggestedDisputeLetters: z.array(disputeLetterSchema).optional(),
 
