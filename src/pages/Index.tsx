@@ -5,19 +5,12 @@ import { SettlementsBanner } from '@/components/settlements-banner';
 
 export default function Index() {
     return (
-        <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
-            {/* Ambient Background Orbs */}
-            <div className="fixed inset-0 pointer-events-none -z-10">
-                <div className="ambient-orb ambient-orb-primary absolute -top-[10%] -left-[10%] w-[40%] h-[40%]" />
-                <div className="ambient-orb ambient-orb-secondary absolute bottom-[10%] -right-[5%] w-[30%] h-[30%]" />
-                <div className="ambient-orb ambient-orb-primary absolute top-[60%] left-[20%] w-[20%] h-[20%]" />
-            </div>
-
+        <div className="min-h-screen bg-gray-50 text-gray-900 relative overflow-hidden">
             {/* Settlements Banner */}
             <SettlementsBanner />
 
             {/* Header */}
-            <header className="sticky top-0 z-40 bg-white border-b border-neutral-200 shadow-sm">
+            <header className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
                 <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <img
@@ -27,14 +20,14 @@ export default function Index() {
                         />
                     </div>
                     <Link to="/analyze">
-                        <button className="px-4 py-1.5 text-sm rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 font-medium">
+                        <button className="px-5 py-2 text-sm rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 font-semibold shadow-md hover:shadow-lg">
                             Analyze Report
                         </button>
                     </Link>
                 </div>
             </header>
 
-            {/* Hero Section - adjusted for sticky header */}
+            {/* Hero Section - Keep dark with video */}
             <section className="relative pt-32 pb-24 px-6 min-h-[90vh] flex items-center overflow-hidden isolate">
                 {/* Video Background */}
                 <div className="absolute inset-0 z-0 bg-black">
@@ -95,10 +88,10 @@ export default function Index() {
             </section>
 
             {/* How It Works */}
-            <section className="py-24 px-6 section-border">
+            <section className="py-24 px-6 bg-white">
                 <div className="max-w-7xl mx-auto">
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-center mb-4 tracking-tight">How It Works</h2>
-                    <p className="text-center text-muted-foreground mb-16 max-w-2xl mx-auto font-light text-lg">
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-center mb-4 tracking-tight text-gray-900">How It Works</h2>
+                    <p className="text-center text-gray-600 mb-16 max-w-2xl mx-auto font-light text-lg">
                         Simple three-step process to get your complete credit analysis
                     </p>
                     <div className="grid md:grid-cols-3 gap-10 max-w-5xl mx-auto">
@@ -107,12 +100,12 @@ export default function Index() {
                             { step: '2', title: 'AI Analysis', desc: 'Our AI analyzes your credit health, score factors, accounts, and automatically checks for FCRA violations' },
                             { step: '3', title: 'Get Your Results', desc: 'Receive detailed recommendations, improvement strategies, and next steps to fix your credit' }
                         ].map((item) => (
-                            <div key={item.step} className="text-center">
-                                <div className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-6 bg-primary text-primary-foreground shadow-glow">
+                            <div key={item.step} className="text-center bg-gray-50 rounded-2xl p-8 shadow-md border border-gray-100">
+                                <div className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-6 bg-primary text-primary-foreground shadow-lg">
                                     {item.step}
                                 </div>
-                                <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
-                                <p className="text-muted-foreground font-light">{item.desc}</p>
+                                <h3 className="text-xl font-semibold mb-3 text-gray-900">{item.title}</h3>
+                                <p className="text-gray-600 font-light">{item.desc}</p>
                             </div>
                         ))}
                     </div>
@@ -120,11 +113,11 @@ export default function Index() {
             </section>
 
             {/* Features */}
-            <section className="py-24 px-6 section-border">
+            <section className="py-24 px-6 bg-gray-50">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold mb-4 tracking-tight">What You'll Get - Completely Free</h2>
-                        <p className="text-muted-foreground font-light max-w-2xl mx-auto text-lg">
+                        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold mb-4 tracking-tight text-gray-900">What You'll Get - Completely Free</h2>
+                        <p className="text-gray-600 font-light max-w-2xl mx-auto text-lg">
                             Our AI-powered analysis provides everything you need to understand and improve your credit health
                         </p>
                     </div>
@@ -163,10 +156,10 @@ export default function Index() {
                         ].map((feature, idx) => (
                             <div
                                 key={idx}
-                                className="group glass-panel rounded-3xl p-8 card-hover border-gradient">
+                                className="group bg-white rounded-2xl p-8 shadow-md border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                                 <feature.icon className="w-12 h-12 mb-5 text-primary" />
-                                <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                                <p className="text-muted-foreground font-light leading-relaxed">{feature.description}</p>
+                                <h3 className="text-xl font-semibold mb-3 text-gray-900">{feature.title}</h3>
+                                <p className="text-gray-600 font-light leading-relaxed">{feature.description}</p>
                             </div>
                         ))}
                     </div>
@@ -174,19 +167,16 @@ export default function Index() {
             </section>
 
             {/* FCRA Violations Bonus Section */}
-            <section className="py-24 px-6">
+            <section className="py-24 px-6 bg-white">
                 <div className="max-w-7xl mx-auto">
-                    <div className="rounded-3xl p-10 lg:p-14 border border-warning/30 bg-warning/5 relative overflow-hidden">
-                        <div className="absolute inset-0 opacity-10">
-                            <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-warning rounded-full blur-[150px]" />
-                        </div>
+                    <div className="rounded-3xl p-10 lg:p-14 border-2 border-amber-200 bg-amber-50 relative overflow-hidden shadow-lg">
                         <div className="relative z-10">
                             <div className="text-center mb-12">
-                                <div className="inline-block px-6 py-2 rounded-full bg-warning text-warning-foreground font-bold mb-6">
+                                <div className="inline-block px-6 py-2 rounded-full bg-amber-500 text-white font-bold mb-6 shadow-md">
                                     BONUS FEATURE
                                 </div>
-                                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold mb-4 tracking-tight">Plus: Automatic FCRA Violation Detection</h2>
-                                <p className="text-muted-foreground font-light max-w-2xl mx-auto text-lg">
+                                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold mb-4 tracking-tight text-gray-900">Plus: Automatic FCRA Violation Detection</h2>
+                                <p className="text-gray-600 font-light max-w-2xl mx-auto text-lg">
                                     As an added benefit, our tool automatically scans for Fair Credit Reporting Act violations that could entitle you to legal compensation
                                 </p>
                             </div>
@@ -201,9 +191,9 @@ export default function Index() {
                                 ].map((violation, idx) => (
                                     <div
                                         key={idx}
-                                        className="glass-panel rounded-2xl p-6 border border-warning/20">
-                                        <h3 className="text-lg font-semibold mb-2">{violation.title}</h3>
-                                        <p className="text-muted-foreground text-sm font-light">{violation.desc}</p>
+                                        className="bg-white rounded-2xl p-6 border border-amber-200 shadow-sm hover:shadow-md transition-shadow">
+                                        <h3 className="text-lg font-semibold mb-2 text-gray-900">{violation.title}</h3>
+                                        <p className="text-gray-600 text-sm font-light">{violation.desc}</p>
                                     </div>
                                 ))}
                             </div>
@@ -213,29 +203,26 @@ export default function Index() {
             </section>
 
             {/* CARC Services Section */}
-            <section className="py-24 px-6 section-border">
+            <section className="py-24 px-6 bg-gray-50">
                 <div className="max-w-7xl mx-auto">
-                    <div className="rounded-3xl p-10 lg:p-14 border border-primary/30 bg-gradient-to-br from-primary/10 to-transparent relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-64 h-64 rounded-full -mr-32 -mt-32 bg-primary/10 blur-[100px]" />
-                        <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full -ml-48 -mb-48 bg-accent-coral/10 blur-[120px]" />
-
+                    <div className="rounded-3xl p-10 lg:p-14 border-2 border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-white relative overflow-hidden shadow-xl">
                         <div className="relative z-10">
                             <div className="text-center mb-12">
-                                <div className="inline-block px-6 py-3 rounded-full bg-primary text-primary-foreground font-bold mb-6 animate-pulse-glow">
+                                <div className="inline-block px-6 py-3 rounded-full bg-primary text-primary-foreground font-bold mb-6 shadow-lg">
                                     PROTECT YOUR CONSUMER RIGHTS
                                 </div>
-                                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold mb-4 tracking-tight">Found Violations? We Fight For You!</h2>
-                                <p className="text-xl text-foreground/80 max-w-3xl mx-auto mb-2 font-light">
+                                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold mb-4 tracking-tight text-gray-900">Found Violations? We Fight For You!</h2>
+                                <p className="text-xl text-gray-700 max-w-3xl mx-auto mb-2 font-light">
                                     Consumer Advocate Resolution Center - America's Largest Consumer Protection Advocates
                                 </p>
-                                <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-light">
+                                <p className="text-lg text-gray-600 max-w-2xl mx-auto font-light">
                                     We Fight For The 99%! Our nationwide network of attorneys sue debt collectors and credit reporting agencies
                                 </p>
                             </div>
 
                             {/* Recent Settlements Carousel */}
-                            <div className="glass-panel rounded-2xl p-8 mb-8">
-                                <h3 className="text-2xl font-semibold mb-6 text-center">Recent Settlements</h3>
+                            <div className="bg-white rounded-2xl p-8 mb-8 shadow-md border border-gray-100">
+                                <h3 className="text-2xl font-semibold mb-6 text-center text-gray-900">Recent Settlements</h3>
                                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
                                     {[
                                         { amount: '$100K', desc: 'Fraudulent credit info resulting in identity theft and missed credit opportunities' },
@@ -245,17 +232,17 @@ export default function Index() {
                                         { amount: '$42K', desc: 'Inaccurate eviction listing & reporting leading to home refinance denial' },
                                         { amount: '$40K', desc: 'Duplicate account reporting causing significant credit score drop' }
                                     ].map((settlement, idx) => (
-                                        <div key={idx} className="rounded-2xl p-6 border-2 border-success/30 bg-success/5">
-                                            <p className="text-3xl font-bold mb-2 text-success">{settlement.amount}</p>
-                                            <p className="text-sm text-muted-foreground font-light">{settlement.desc}</p>
+                                        <div key={idx} className="rounded-2xl p-6 border-2 border-emerald-200 bg-emerald-50 shadow-sm">
+                                            <p className="text-3xl font-bold mb-2 text-emerald-600">{settlement.amount}</p>
+                                            <p className="text-sm text-gray-600 font-light">{settlement.desc}</p>
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
                             {/* What We Do */}
-                            <div className="glass-panel rounded-2xl p-8 mb-8">
-                                <h3 className="text-2xl font-semibold mb-6 text-center">How C.A.R.C Fights For You</h3>
+                            <div className="bg-white rounded-2xl p-8 mb-8 shadow-md border border-gray-100">
+                                <h3 className="text-2xl font-semibold mb-6 text-center text-gray-900">How C.A.R.C Fights For You</h3>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     {[
                                         { title: 'FREE Case Review', desc: 'No charge to review your case and estimate what type of settlement you could be eligible for' },
@@ -263,11 +250,11 @@ export default function Index() {
                                         { title: 'FCRA & FDCPA Violations', desc: 'We hold companies accountable using consumer laws that protect your rights' },
                                         { title: 'Corrected Reports or Settlements', desc: 'We work to correct inaccuracies on your report or secure monetary compensation' }
                                     ].map((item, idx) => (
-                                        <div key={idx} className="flex items-start gap-4">
-                                            <div className="flex-shrink-0 w-2 h-2 rounded-full bg-success mt-2" />
+                                        <div key={idx} className="flex items-start gap-4 bg-gray-50 p-4 rounded-xl">
+                                            <div className="flex-shrink-0 w-3 h-3 rounded-full bg-emerald-500 mt-1.5" />
                                             <div>
-                                                <p className="font-semibold mb-1">{item.title}</p>
-                                                <p className="text-muted-foreground text-sm font-light">{item.desc}</p>
+                                                <p className="font-semibold mb-1 text-gray-900">{item.title}</p>
+                                                <p className="text-gray-600 text-sm font-light">{item.desc}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -275,14 +262,14 @@ export default function Index() {
                             </div>
 
                             {/* Live Training */}
-                            <div className="rounded-2xl p-8 mb-8 border-2 border-info/40 bg-gradient-to-br from-info/20 to-info/5">
+                            <div className="rounded-2xl p-8 mb-8 border-2 border-sky-200 bg-sky-50 shadow-md">
                                 <div className="text-center">
-                                    <h3 className="text-2xl font-bold mb-3">CATCH US LIVE EVERY THURSDAY NIGHT</h3>
-                                    <p className="text-3xl font-bold mb-2">6:00 PM - 7:00 PM CST</p>
-                                    <p className="text-lg mb-4 font-light">Register to Learn More on How to Protect Your Rights!</p>
-                                    <p className="text-sm mb-6 text-info">Limited for First 100 Participants Only</p>
+                                    <h3 className="text-2xl font-bold mb-3 text-gray-900">CATCH US LIVE EVERY THURSDAY NIGHT</h3>
+                                    <p className="text-3xl font-bold mb-2 text-sky-600">6:00 PM - 7:00 PM CST</p>
+                                    <p className="text-lg mb-4 font-light text-gray-700">Register to Learn More on How to Protect Your Rights!</p>
+                                    <p className="text-sm mb-6 text-sky-600 font-medium">Limited for First 100 Participants Only</p>
                                     <a href="tel:1-888-817-2272">
-                                        <button className="btn-pill bg-foreground text-background font-bold hover:bg-info hover:text-info-foreground transition-all">
+                                        <button className="px-8 py-4 rounded-full bg-gray-900 text-white font-bold hover:bg-sky-600 transition-all shadow-lg hover:shadow-xl">
                                             Call 1-888-817-CARC (2272)
                                         </button>
                                     </a>
@@ -291,20 +278,20 @@ export default function Index() {
 
                             {/* CTA */}
                             <div className="text-center">
-                                <div className="glass-panel rounded-2xl p-8 max-w-3xl mx-auto">
-                                    <p className="text-lg mb-4 font-light">
+                                <div className="bg-white rounded-2xl p-8 max-w-3xl mx-auto shadow-md border border-gray-100">
+                                    <p className="text-lg mb-4 font-light text-gray-700">
                                         If you've been searching for a "Consumer Advocate" - you found us!
                                     </p>
-                                    <p className="text-sm text-muted-foreground mb-6 font-light">
+                                    <p className="text-sm text-gray-600 mb-6 font-light">
                                         C.A.R.C puts our clients first. We work with you from start to finish. If a violation has been committed against you,
                                         we will have it reviewed by the law firm FREE of charge to determine whether you have a potential claim.
                                     </p>
                                     <a href="tel:1-888-817-2272">
-                                        <button className="btn-pill btn-glow bg-success text-success-foreground font-bold">
+                                        <button className="px-8 py-4 rounded-full bg-emerald-500 text-white font-bold hover:bg-emerald-600 transition-all shadow-lg hover:shadow-xl">
                                             Get Your Free Case Review
                                         </button>
                                     </a>
-                                    <p className="text-sm text-muted-foreground mt-4">Call: 1-888-817-CARC (2272) - No Charge for Case Review</p>
+                                    <p className="text-sm text-gray-500 mt-4">Call: 1-888-817-CARC (2272) - No Charge for Case Review</p>
                                 </div>
                             </div>
                         </div>
@@ -313,33 +300,33 @@ export default function Index() {
             </section>
 
             {/* How to Get Your Credit Reports */}
-            <section className="py-24 px-6">
+            <section className="py-24 px-6 bg-white">
                 <div className="max-w-7xl mx-auto">
-                    <div className="rounded-3xl p-10 lg:p-14 border border-info/20 bg-info/5">
-                        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-center mb-4 tracking-tight">How to Get Your Credit Reports</h2>
-                        <p className="text-center text-muted-foreground mb-12 max-w-3xl mx-auto font-light text-lg">
+                    <div className="rounded-3xl p-10 lg:p-14 border-2 border-sky-200 bg-sky-50 shadow-lg">
+                        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-center mb-4 tracking-tight text-gray-900">How to Get Your Credit Reports</h2>
+                        <p className="text-center text-gray-600 mb-12 max-w-3xl mx-auto font-light text-lg">
                             To get your free credit analysis, you'll need to obtain official PDF copies from the three major credit bureaus
                         </p>
                         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
                             {[
-                                { title: 'Experian', domain: 'experian.com', colorClass: 'primary', info: 'Includes credit score' },
-                                { title: 'Equifax', domain: 'equifax.com', colorClass: 'info', info: 'Detailed account information' },
-                                { title: 'TransUnion', domain: 'transunion.com', colorClass: 'success', info: 'Comprehensive credit history' }
+                                { title: 'Experian', domain: 'experian.com', colorClass: 'text-primary border-primary/30 bg-primary/5', info: 'Includes credit score' },
+                                { title: 'Equifax', domain: 'equifax.com', colorClass: 'text-sky-600 border-sky-200 bg-sky-50', info: 'Detailed account information' },
+                                { title: 'TransUnion', domain: 'transunion.com', colorClass: 'text-emerald-600 border-emerald-200 bg-emerald-50', info: 'Comprehensive credit history' }
                             ].map((bureau, idx) => (
-                                <div key={idx} className={`glass-panel rounded-2xl p-6 border-2 border-${bureau.colorClass}/30`}>
-                                    <h3 className={`text-xl font-bold mb-3 text-${bureau.colorClass}`}>{bureau.title}</h3>
-                                    <p className="text-muted-foreground text-sm mb-3 font-light">Visit <span className="font-semibold text-foreground">{bureau.domain}</span> to download your report</p>
-                                    <ul className="text-muted-foreground text-sm space-y-2 font-light">
-                                        <li className="flex items-center gap-2"><CheckCircle className={`w-4 h-4 text-${bureau.colorClass}`} /> Free annual report available</li>
-                                        <li className="flex items-center gap-2"><CheckCircle className={`w-4 h-4 text-${bureau.colorClass}`} /> {bureau.info}</li>
-                                        <li className="flex items-center gap-2"><CheckCircle className={`w-4 h-4 text-${bureau.colorClass}`} /> Download as PDF</li>
+                                <div key={idx} className={`bg-white rounded-2xl p-6 border-2 shadow-md hover:shadow-lg transition-shadow ${bureau.colorClass.includes('border') ? bureau.colorClass.split(' ').filter(c => c.startsWith('border'))[0] : 'border-gray-200'}`}>
+                                    <h3 className={`text-xl font-bold mb-3 ${bureau.colorClass.split(' ').find(c => c.startsWith('text-'))}`}>{bureau.title}</h3>
+                                    <p className="text-gray-600 text-sm mb-3 font-light">Visit <span className="font-semibold text-gray-900">{bureau.domain}</span> to download your report</p>
+                                    <ul className="text-gray-600 text-sm space-y-2 font-light">
+                                        <li className="flex items-center gap-2"><CheckCircle className={`w-4 h-4 ${bureau.colorClass.split(' ').find(c => c.startsWith('text-'))}`} /> Free annual report available</li>
+                                        <li className="flex items-center gap-2"><CheckCircle className={`w-4 h-4 ${bureau.colorClass.split(' ').find(c => c.startsWith('text-'))}`} /> {bureau.info}</li>
+                                        <li className="flex items-center gap-2"><CheckCircle className={`w-4 h-4 ${bureau.colorClass.split(' ').find(c => c.startsWith('text-'))}`} /> Download as PDF</li>
                                     </ul>
                                 </div>
                             ))}
                         </div>
-                        <div className="mt-10 p-6 rounded-2xl border-2 border-warning/30 bg-warning/5 max-w-4xl mx-auto">
-                            <p className="text-center text-muted-foreground font-light">
-                                <span className="font-semibold text-foreground">Pro Tip:</span> You're entitled to one free credit report from each bureau every year via{' '}
+                        <div className="mt-10 p-6 rounded-2xl border-2 border-amber-200 bg-amber-50 max-w-4xl mx-auto shadow-sm">
+                            <p className="text-center text-gray-700 font-light">
+                                <span className="font-semibold text-gray-900">Pro Tip:</span> You're entitled to one free credit report from each bureau every year via{' '}
                                 <span className="font-semibold text-primary">AnnualCreditReport.com</span>
                             </p>
                         </div>
@@ -349,18 +336,19 @@ export default function Index() {
 
 
             {/* Usage Instructions */}
-            <section className="py-24 px-6">
+            <section className="py-24 px-6 bg-gray-50">
                 <div className="max-w-7xl mx-auto">
-                    <div className="rounded-3xl p-10 lg:p-14 border border-accent-coral/20 bg-accent-coral/5">
-                        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-center mb-4 tracking-tight">Getting Started</h2>
-                        <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto font-light text-lg">
+                    <div className="rounded-3xl p-10 lg:p-14 border-2 border-orange-200 bg-orange-50 shadow-lg">
+                        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-center mb-4 tracking-tight text-gray-900">Getting Started</h2>
+                        <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto font-light text-lg">
                             Follow these simple steps to get the most comprehensive credit analysis
                         </p>
                         <div className="max-w-4xl mx-auto space-y-6">
                             {[
                                 {
                                     title: 'Best Practices',
-                                    colorClass: 'info',
+                                    borderColor: 'border-l-sky-500',
+                                    iconColor: 'text-sky-500',
                                     items: [
                                         { label: 'Upload all 3 reports:', text: 'Get the most complete picture of your credit health across all bureaus' },
                                         { label: 'Use official PDF reports:', text: 'Only upload reports directly downloaded from bureau websites' },
@@ -370,7 +358,8 @@ export default function Index() {
                                 },
                                 {
                                     title: 'What You\'ll Receive',
-                                    colorClass: 'success',
+                                    borderColor: 'border-l-emerald-500',
+                                    iconColor: 'text-emerald-500',
                                     items: [
                                         { label: 'Credit Score Breakdown:', text: 'Understand exactly what\'s affecting your credit score' },
                                         { label: 'Personalized Recommendations:', text: 'Actionable steps to improve your credit health' },
@@ -380,7 +369,8 @@ export default function Index() {
                                 },
                                 {
                                     title: 'Important Notes',
-                                    colorClass: 'accent-coral',
+                                    borderColor: 'border-l-orange-500',
+                                    iconColor: 'text-orange-500',
                                     items: [
                                         { label: '', text: 'This is a 100% free educational tool - no hidden fees or charges' },
                                         { label: '', text: 'All uploads are processed securely and never stored on our servers' },
@@ -389,14 +379,14 @@ export default function Index() {
                                     ]
                                 }
                             ].map((section, idx) => (
-                                <div key={idx} className={`glass-panel rounded-2xl p-6 border-l-4 border-l-${section.colorClass}`}>
-                                    <h3 className="text-lg font-semibold mb-4">{section.title}</h3>
+                                <div key={idx} className={`bg-white rounded-2xl p-6 border-l-4 ${section.borderColor} shadow-md`}>
+                                    <h3 className="text-lg font-semibold mb-4 text-gray-900">{section.title}</h3>
                                     <ul className="space-y-3">
                                         {section.items.map((item, itemIdx) => (
                                             <li key={itemIdx} className="flex items-start gap-3">
-                                                <CheckCircle className={`w-5 h-5 text-${section.colorClass} flex-shrink-0 mt-0.5`} />
-                                                <span className="text-muted-foreground font-light">
-                                                    {item.label && <span className="font-semibold text-foreground">{item.label}</span>} {item.text}
+                                                <CheckCircle className={`w-5 h-5 ${section.iconColor} flex-shrink-0 mt-0.5`} />
+                                                <span className="text-gray-600 font-light">
+                                                    {item.label && <span className="font-semibold text-gray-900">{item.label}</span>} {item.text}
                                                 </span>
                                             </li>
                                         ))}
@@ -409,8 +399,8 @@ export default function Index() {
             </section>
 
             {/* Footer */}
-            <footer className="section-border bg-card/50">
-                <div className="max-w-7xl mx-auto px-6 py-10 text-center text-muted-foreground">
+            <footer className="bg-white border-t border-gray-200">
+                <div className="max-w-7xl mx-auto px-6 py-10 text-center text-gray-600">
                     <p className="mb-2 font-light">© 2024 Consumer Advocate Resolution Center. All Rights Reserved.</p>
                     <p className="text-sm font-light">Your data is processed securely and never stored. | Call: 1-888-817-CARC (2272)</p>
                 </div>
