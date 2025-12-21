@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Upload, FileText, X, CheckCircle, Shield, Clock, ArrowRight } from 'lucide-react';
+import { Upload, FileText, X, CheckCircle, Shield, Clock, ArrowRight, ExternalLink } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import AnalysisResults from '@/components/analysis-results';
 import LeadCaptureDialog, { LeadData } from '@/components/lead-capture-dialog';
@@ -9,9 +9,9 @@ import consumerLogo from '@/assets/consumer-logo.png';
 import experianLogo from '@/assets/experian-logo.png';
 import equifaxLogo from '@/assets/equifax-logo.png';
 import transunionLogo from '@/assets/transunion-logo.png';
+import annualCreditReportLogo from '@/assets/annualcreditreport-logo.png';
 import { supabase } from '@/integrations/supabase/client';
 import { SettlementsBanner } from '@/components/settlements-banner';
-
 interface BureauFiles {
     experian: File | null;
     equifax: File | null;
@@ -231,7 +231,7 @@ export default function Analyze() {
                     <p className="text-lg text-gray-600 mb-3 font-light">
                         Upload reports from all three bureaus for comprehensive cross-bureau analysis
                     </p>
-                    <div className="flex items-center justify-center gap-6 text-sm">
+                    <div className="flex items-center justify-center gap-6 text-sm mb-4">
                         <span className="flex items-center gap-2 text-gray-500">
                             <Clock className="w-4 h-4 text-primary" />
                             ~2 min analysis
@@ -241,6 +241,22 @@ export default function Analyze() {
                             256-bit encrypted
                         </span>
                     </div>
+                    
+                    {/* Get Free Reports Link */}
+                    <a 
+                        href="https://www.annualcreditreport.com" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-3 px-5 py-3 bg-white rounded-full shadow-sm border border-gray-200 hover:shadow-md hover:border-primary/30 transition-all group"
+                    >
+                        <span className="text-sm text-gray-600">Don't have your reports?</span>
+                        <img 
+                            src={annualCreditReportLogo} 
+                            alt="Annual Credit Report" 
+                            className="h-6 w-auto"
+                        />
+                        <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" />
+                    </a>
                 </div>
 
                 <div className="bg-white rounded-3xl p-8 md:p-12 animate-reveal-delay-1 shadow-xl border border-gray-100">

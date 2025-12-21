@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
-import { FileText, Shield, TrendingUp, AlertCircle, BarChart3, CheckCircle } from 'lucide-react';
+import { FileText, Shield, TrendingUp, AlertCircle, BarChart3, CheckCircle, ExternalLink } from 'lucide-react';
 import consumerLogo from '@/assets/consumer-logo.png';
+import annualCreditReportLogo from '@/assets/annualcreditreport-logo.png';
 import { SettlementsBanner } from '@/components/settlements-banner';
-
 export default function Index() {
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900 relative overflow-hidden">
@@ -84,6 +84,31 @@ export default function Index() {
                     <p className="animate-reveal-delay-3 text-sm text-white/60 mt-6">
                         Upload reports from all 3 bureaus for the most comprehensive analysis
                     </p>
+                </div>
+            </section>
+
+            {/* Get Free Reports Banner */}
+            <section className="py-12 px-6 bg-gradient-to-r from-primary/5 via-white to-primary/5 border-y border-gray-100">
+                <div className="max-w-4xl mx-auto">
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-8">
+                        <div className="text-center md:text-left">
+                            <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-2">Get Your Free Reports From</p>
+                            <p className="text-gray-600 text-sm">The only source authorized by federal law</p>
+                        </div>
+                        <a 
+                            href="https://www.annualcreditreport.com" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-4 px-6 py-4 bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-lg hover:border-primary/20 transition-all group"
+                        >
+                            <img 
+                                src={annualCreditReportLogo} 
+                                alt="Annual Credit Report - Authorized by Federal Law" 
+                                className="h-12 w-auto"
+                            />
+                            <ExternalLink className="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" />
+                        </a>
+                    </div>
                 </div>
             </section>
 
