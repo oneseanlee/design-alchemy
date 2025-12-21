@@ -1,6 +1,4 @@
-'use client';
-
-import { 
+import {
   ArrowLeft, AlertTriangle, CheckCircle, Shield, FileText, Scale, Gavel, 
   BookOpen, FileWarning, Clock, Copy, UserX, DollarSign, Building, Phone, 
   AlertOctagon, TrendingUp, Calendar, PieChart, Target, ClipboardList,
@@ -10,8 +8,6 @@ import { AnalysisResult } from '@/lib/analysis-schema';
 import { BookCallCTA } from '@/components/book-call-cta';
 import { useLead } from '@/lib/lead-context';
 import { useEffect, useState, useRef, useCallback } from 'react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import carcLogo from '@/assets/carc-header-logo.png';
 
 interface AnalysisResultsProps {
@@ -22,7 +18,6 @@ interface AnalysisResultsProps {
 export default function AnalysisResults({ results, onReset }: AnalysisResultsProps) {
   const { lead, updateLead } = useLead();
   const contentRef = useRef<HTMLDivElement>(null);
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     executive: true,
     utilization: true,
@@ -40,71 +35,10 @@ export default function AnalysisResults({ results, onReset }: AnalysisResultsPro
     window.print();
   }, []);
 
-  const handleDownloadPdf = useCallback(async () => {
-    if (!contentRef.current || isGeneratingPdf) return;
-    
-    setIsGeneratingPdf(true);
-    
-    try {
-      // Expand all sections for PDF
-      const allExpanded: Record<string, boolean> = {};
-      Object.keys(expandedSections).forEach(key => {
-        allExpanded[key] = true;
-      });
-      setExpandedSections(allExpanded);
-      
-      // Wait for re-render
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      const element = contentRef.current;
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
-      
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-      const imgX = (pdfWidth - imgWidth * ratio) / 2;
-      
-      // Calculate pages needed
-      const scaledHeight = imgHeight * ratio;
-      const pageHeight = pdfHeight;
-      let heightLeft = scaledHeight;
-      let position = 0;
-      
-      // Add first page
-      pdf.addImage(imgData, 'PNG', imgX, position, imgWidth * ratio, scaledHeight);
-      heightLeft -= pageHeight;
-      
-      // Add additional pages if needed
-      while (heightLeft > 0) {
-        position = heightLeft - scaledHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', imgX, position, imgWidth * ratio, scaledHeight);
-        heightLeft -= pageHeight;
-      }
-      
-      const date = new Date().toISOString().split('T')[0];
-      pdf.save(`Credit-Report-Analysis-${date}.pdf`);
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-    } finally {
-      setIsGeneratingPdf(false);
-    }
-  }, [expandedSections, isGeneratingPdf]);
+  const handleDownloadPdf = useCallback(() => {
+    // Use print dialog as a workaround - users can save as PDF from there
+    window.print();
+  }, []);
 
   const getPriorityColor = (priority: string | undefined) => {
     if (priority === 'High') return 'bg-red-100 text-red-800 border-red-300';
@@ -221,11 +155,10 @@ export default function AnalysisResults({ results, onReset }: AnalysisResultsPro
               </button>
               <button 
                 onClick={handleDownloadPdf}
-                disabled={isGeneratingPdf}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 transition-colors text-sm font-medium text-white disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 transition-colors text-sm font-medium text-white"
               >
                 <Download className="w-4 h-4" />
-                <span className="hidden sm:inline">{isGeneratingPdf ? 'Generating...' : 'Download PDF'}</span>
+                <span className="hidden sm:inline">Save as PDF</span>
               </button>
             </div>
           </div>
