@@ -10,6 +10,9 @@ import ApiTest from "./pages/ApiTest";
 import FreeEbook from "./pages/FreeEbook";
 import Portal from "./pages/Portal";
 import GetReports from "./pages/GetReports";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import Disclaimer from "./pages/Disclaimer";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +30,9 @@ const App = () => (
                         <Route path="/api-test" element={<ApiTest />} />
                         <Route path="/portal" element={<Portal />} />
                         <Route path="/portal/get-reports" element={<GetReports />} />
+                        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                        <Route path="/terms-of-service" element={<TermsOfService />} />
+                        <Route path="/disclaimer" element={<Disclaimer />} />
                     </Routes>
                 </BrowserRouter>
             </TooltipProvider>
