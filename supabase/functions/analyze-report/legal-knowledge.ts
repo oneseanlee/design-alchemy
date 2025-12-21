@@ -1,6 +1,124 @@
 // Comprehensive FCRA/FDCPA Legal Knowledge Base
 // Extracted from official statutes and consumer protection resources
 
+// ============================================================
+// PRIORITY VIOLATIONS - TOP 6 FCRA/FDCPA ISSUES TO DETECT
+// ============================================================
+export const PRIORITY_VIOLATIONS = {
+  duplicateAccounts: {
+    id: "DUPLICATE_ACCOUNTS",
+    title: "Duplicate Account Reporting",
+    severity: "High",
+    category: "FCRA",
+    legalBasis: "15 U.S.C. § 1681e(b) - Maximum Possible Accuracy",
+    statuteSection: "§ 1681e(b)",
+    description: "Same debt reported twice - by original creditor AND collection agency, or multiple collectors reporting same underlying debt. This artificially inflates debt and damages credit score.",
+    detectionCriteria: [
+      "Same debt appearing under both original creditor and collection agency",
+      "Multiple collection agencies reporting the same underlying debt",
+      "Account shows zero balance but still reflects negative history while duplicate shows balance",
+      "Same account number or similar balance amounts from different reporters",
+      "Charged-off account AND collection account for same debt"
+    ],
+    disputeLanguage: "I am disputing this account as a duplicate entry. The same debt is being reported multiple times which violates 15 U.S.C. § 1681e(b) requiring maximum possible accuracy. The original debt is already reported by [ORIGINAL CREDITOR]. This duplicate reporting artificially inflates my debt obligations and unfairly damages my credit score. Please delete this duplicate entry immediately.",
+    estimatedDamages: "$100-$1,000 statutory damages per violation + actual damages + attorney fees"
+  },
+  identityTheft: {
+    id: "IDENTITY_THEFT",
+    title: "Identity Theft / Unauthorized Account",
+    severity: "Critical",
+    category: "FCRA",
+    legalBasis: "15 U.S.C. § 1681c-2 - Block of Information Resulting from Identity Theft",
+    statuteSection: "§ 1681c-2",
+    description: "Unauthorized account opened without consumer consent. Any account not opened by the consumer constitutes identity theft and must be blocked and removed.",
+    detectionCriteria: [
+      "Account consumer does not recognize",
+      "Account opened without consumer authorization",
+      "Account with unfamiliar creditor or unknown account details",
+      "Accounts with addresses or employment info consumer never had",
+      "Inquiries from companies consumer never applied to"
+    ],
+    disputeLanguage: "I am disputing this account as identity theft. I did not open this account, authorize anyone to open this account on my behalf, nor did I benefit from this account in any way. Pursuant to 15 U.S.C. § 1681c-2, I demand this fraudulent account be blocked and permanently removed from my credit report within 4 business days. Failure to do so constitutes a willful violation of the FCRA.",
+    estimatedDamages: "$100-$1,000 statutory + punitive damages for willful noncompliance + attorney fees"
+  },
+  wrongBalances: {
+    id: "WRONG_BALANCES",
+    title: "Inaccurate Balance on Paid/Settled Account",
+    severity: "High",
+    category: "FCRA",
+    legalBasis: "15 U.S.C. § 1681e(b) - Maximum Possible Accuracy / § 1681s-2(a) - Furnisher Accuracy",
+    statuteSection: "§ 1681e(b) / § 1681s-2(a)",
+    description: "Accounts that have been paid or settled should show $0 balance and be marked appropriately. Reporting a balance on paid accounts is inaccurate and violates FCRA.",
+    detectionCriteria: [
+      "Paid account showing balance greater than $0",
+      "Settled account not marked as 'Paid/Settled for less than amount owed'",
+      "Account marked as paid but still showing past due amount",
+      "Closed account with activity after closure date",
+      "Balance doesn't match actual payoff or settlement amount"
+    ],
+    disputeLanguage: "I am disputing the balance shown on this account. This account was paid/settled on [DATE] and should reflect a $0 balance and be marked as 'Paid in Full' or 'Paid/Settled for less than amount owed.' The continued reporting of a balance is inaccurate and violates 15 U.S.C. § 1681e(b). Please update this account to reflect accurate information immediately.",
+    estimatedDamages: "$100-$1,000 statutory + actual damages for credit denial + attorney fees"
+  },
+  postBankruptcy: {
+    id: "POST_BANKRUPTCY",
+    title: "Post-Bankruptcy Reporting Violation",
+    severity: "High",
+    category: "FCRA",
+    legalBasis: "15 U.S.C. § 1681e(b) - Maximum Accuracy / 11 U.S.C. § 524 - Discharge Injunction",
+    statuteSection: "§ 1681e(b) / Bankruptcy § 524",
+    description: "Accounts discharged in bankruptcy must be marked as 'Included in Bankruptcy' or 'Discharged' with $0 balance, $0 monthly payment, and no past due amount. Reporting otherwise violates both FCRA and bankruptcy discharge injunction.",
+    detectionCriteria: [
+      "Discharged account showing balance greater than $0",
+      "Discharged account showing monthly payment amount",
+      "Discharged account showing past due amount",
+      "Account not marked as 'Included in Bankruptcy' after discharge",
+      "Collection activity reported after bankruptcy discharge date",
+      "Account status not updated to reflect discharge"
+    ],
+    disputeLanguage: "This account was discharged in bankruptcy on [DISCHARGE DATE], Case No. [CASE NUMBER]. Pursuant to 15 U.S.C. § 1681e(b) and the bankruptcy discharge injunction under 11 U.S.C. § 524, this account must show: $0 balance, $0 monthly payment, $0 past due, and status 'Included in Bankruptcy' or 'Discharged in Bankruptcy.' The current reporting violates both the FCRA and federal bankruptcy law. Correct immediately.",
+    estimatedDamages: "$100-$1,000 statutory + actual damages + potential bankruptcy court sanctions"
+  },
+  cancelledDebt1099C: {
+    id: "1099_C_VIOLATION",
+    title: "1099-C Cancelled Debt Still Reporting Balance",
+    severity: "High",
+    category: "FCRA",
+    legalBasis: "15 U.S.C. § 1681e(b) - Maximum Possible Accuracy",
+    statuteSection: "§ 1681e(b)",
+    description: "When a creditor issues a 1099-C (Cancellation of Debt), the debt is legally cancelled. The credit report must show $0 balance. Reporting an outstanding balance after 1099-C issuance is inaccurate.",
+    detectionCriteria: [
+      "Charged-off account showing balance greater than $0",
+      "Account where 1099-C was issued still showing balance",
+      "Cancelled debt being reported as outstanding",
+      "Collection account for debt that was cancelled",
+      "Balance remaining after creditor claimed tax benefit for loss"
+    ],
+    disputeLanguage: "I am disputing the balance on this account. A 1099-C (Cancellation of Debt) was issued for this account on [DATE], meaning the creditor has cancelled the debt and claimed a tax benefit for the loss. Under 15 U.S.C. § 1681e(b), this account must reflect a $0 balance. Reporting an outstanding balance on cancelled debt is inaccurate and misleading. Update to $0 balance immediately.",
+    estimatedDamages: "$100-$1,000 statutory + actual damages + attorney fees",
+    note: "Important: Consumer is NOT required to report cancelled debt as income on taxes in many circumstances."
+  },
+  tcpaViolations: {
+    id: "TCPA_VIOLATIONS",
+    title: "TCPA Robocall/Spam Violations",
+    severity: "High",
+    category: "TCPA",
+    legalBasis: "47 U.S.C. § 227 - Telephone Consumer Protection Act",
+    statuteSection: "§ 227(b)",
+    description: "TCPA protects consumers from harassing robocalls, spam texts, and debt collection calls made without consent. Robocalls are automated calls/texts made by computer systems with no human involvement.",
+    detectionCriteria: [
+      "Collection notes mentioning repeated calls",
+      "Evidence of robocalls or automated dialing",
+      "Calls before 8 AM or after 9 PM",
+      "Calls to cell phone without prior consent",
+      "Calls after consumer requested no contact",
+      "Prerecorded voice messages without consent"
+    ],
+    disputeLanguage: "I have received unauthorized robocalls/automated text messages from this debt collector without my prior express consent in violation of the Telephone Consumer Protection Act, 47 U.S.C. § 227. Each unwanted call or text is a separate violation subject to $500-$1,500 in statutory damages. I demand all calling/texting cease immediately and formal acknowledgment of this violation.",
+    estimatedDamages: "$500 per violation (up to $1,500 for willful violations)",
+    note: "Separate from credit reporting - relates to collection harassment. Document all calls with dates/times."
+  }
+};
+
 export const FDCPA_VIOLATIONS = {
   "1692a": {
     section: "15 U.S.C. § 1692a",

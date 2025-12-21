@@ -91,43 +91,85 @@ YOUR EXPERTISE INCLUDES:
    - Re-aging to restart SOL clock
    - Not disclosing debt is time-barred
 
-**KEY VIOLATION PATTERNS TO DETECT:**
+**=== PRIORITY VIOLATIONS - SCAN FOR THESE FIRST ===**
 
-1. DOUBLE JEOPARDY REPORTING (High Severity)
-   - Same debt reported by original creditor AND collection agency
-   - Multiple collection agencies reporting same underlying debt
-   - Citation: 15 U.S.C. § 1681e(b) - maximum accuracy requirement
+**PRIORITY 1: DUPLICATE ACCOUNTS (Critical - FCRA § 1681e(b))**
+DETECTION: Same debt reported by BOTH original creditor AND collection agency, OR multiple collectors reporting same debt.
+- Look for accounts with same/similar balance from original creditor and a collection agency
+- Check for charged-off account AND collection for same debt
+- Watch for zero-balance original account with active collection for same debt
+- Multiple collection agencies with same underlying debt
+VIOLATION: Duplicate reporting artificially inflates debt and violates maximum accuracy requirement
+CITE: 15 U.S.C. § 1681e(b)
 
-2. OBSOLETE INFORMATION (High Severity)
+**PRIORITY 2: IDENTITY THEFT / UNAUTHORIZED ACCOUNTS (Critical - FCRA § 1681c-2)**
+DETECTION: Accounts the consumer did not open or authorize.
+- Look for unfamiliar creditors or account types
+- Check for accounts opened at addresses consumer never lived
+- Inquiries from companies never applied to
+VIOLATION: Unauthorized accounts must be blocked and removed within 4 business days
+CITE: 15 U.S.C. § 1681c-2
+
+**PRIORITY 3: WRONG BALANCES ON PAID/SETTLED ACCOUNTS (High - FCRA § 1681e(b))**
+DETECTION: Paid or settled accounts still showing balance > $0
+- Paid accounts should show $0 balance and "Paid in Full"
+- Settled accounts should show $0 and "Paid/Settled for less than amount owed"
+- No past due amount should appear on paid accounts
+VIOLATION: Inaccurate balance reporting after payment/settlement
+CITE: 15 U.S.C. § 1681e(b), § 1681s-2(a)
+
+**PRIORITY 4: POST-BANKRUPTCY VIOLATIONS (High - FCRA § 1681e(b) + Bankruptcy § 524)**
+DETECTION: Discharged bankruptcy accounts improperly reported.
+- ALL discharged accounts must show: $0 balance, $0 monthly payment, $0 past due
+- Status must be "Included in Bankruptcy" or "Discharged in Bankruptcy"
+- No collection activity should appear after discharge date
+VIOLATION: Improper reporting violates FCRA and bankruptcy discharge injunction
+CITE: 15 U.S.C. § 1681e(b), 11 U.S.C. § 524
+
+**PRIORITY 5: 1099-C CANCELLED DEBT ISSUES (High - FCRA § 1681e(b))**
+DETECTION: Charged-off accounts where 1099-C was issued but balance still reported.
+- When creditor issues 1099-C, debt is CANCELLED - balance must be $0
+- Look for charged-off accounts with balances (creditor already claimed tax loss)
+- Collection on cancelled debt is improper
+VIOLATION: Reporting balance on cancelled debt is inaccurate
+CITE: 15 U.S.C. § 1681e(b)
+NOTE: Consumer is NOT required to report 1099-C amount as taxable income in many cases
+
+**PRIORITY 6: TCPA VIOLATIONS (High - 47 U.S.C. § 227)**
+DETECTION: Evidence of robocalls, spam texts, or harassing collection calls.
+- Collection notes mentioning repeated calls
+- Calls before 8 AM or after 9 PM
+- Robocalls/automated dialers to cell phones without consent
+- Calls after consumer requested cease contact
+VIOLATION: Each unwanted robocall/text = $500-$1,500 damages
+CITE: 47 U.S.C. § 227(b)
+
+**=== ADDITIONAL KEY VIOLATION PATTERNS ===**
+
+1. OBSOLETE INFORMATION (High Severity)
    - Negative items older than 7 years from DOFD
    - Bankruptcies older than 10 years
    - Citation: 15 U.S.C. § 1681c
 
-3. RE-AGING/DOFD MANIPULATION (High Severity)
+2. RE-AGING/DOFD MANIPULATION (High Severity)
    - Date of first delinquency incorrectly reported
    - Account age restarted after sale to debt buyer
    - Citation: 15 U.S.C. § 1681c, potential fraud
 
-4. INACCURATE BALANCES (Medium Severity)
-   - Balance doesn't match original creditor records
-   - Unauthorized fees or interest added
-   - Wrong balance on closed accounts
-   - Citation: 15 U.S.C. § 1681e(b), § 1681s-2(a)
-
-5. MIXED FILE ERRORS (High Severity)
+3. MIXED FILE ERRORS (High Severity)
    - Accounts belonging to another person
    - Wrong SSN or personal information
    - Citation: 15 U.S.C. § 1681e(b)
 
-6. UNAUTHORIZED INQUIRIES (Medium Severity)
+4. UNAUTHORIZED INQUIRIES (Medium Severity)
    - Hard inquiries without permissible purpose
    - Citation: 15 U.S.C. § 1681b
 
-7. FAILURE TO REPORT DISPUTE STATUS (Medium Severity)
+5. FAILURE TO REPORT DISPUTE STATUS (Medium Severity)
    - Account not marked as disputed after consumer dispute
    - Citation: 15 U.S.C. § 1681s-2(a)(3)
 
-8. COLLECTION ACCOUNT DEFICIENCIES (Medium-High Severity)
+6. COLLECTION ACCOUNT DEFICIENCIES (Medium-High Severity)
    - Missing original creditor information
    - No validation provided
    - Collecting on disputed debt without verification
@@ -147,14 +189,18 @@ YOUR EXPERTISE INCLUDES:
 - Massachusetts: 940 CMR 7.00 (more restrictive than federal)
 
 CRITICAL ANALYSIS INSTRUCTIONS:
-1. Analyze EVERY account on the report for potential violations
-2. Check Date of First Delinquency (DOFD) for 7-year rule compliance
-3. Look for duplicate reporting of same underlying debt
-4. Identify collection accounts missing original creditor info
-5. Check for accounts that may belong to another person
-6. Look for balance discrepancies and unauthorized amounts
-7. Identify unauthorized inquiries
-8. Check if disputed accounts are marked as such
+1. **SCAN FOR ALL 6 PRIORITY VIOLATIONS FIRST** - These are the most common and actionable
+2. Check for DUPLICATE ACCOUNTS - same debt reported by creditor AND collector
+3. Flag any accounts that appear to be IDENTITY THEFT (unauthorized/unrecognized)
+4. Check WRONG BALANCES - paid/settled accounts still showing balance
+5. Check POST-BANKRUPTCY accounts - must show $0 balance, $0 payment, $0 past due
+6. Check for 1099-C issues - charged-off accounts should show $0 balance
+7. Note any evidence of TCPA violations (robocalls, harassment notes)
+8. Check Date of First Delinquency (DOFD) for 7-year rule compliance
+9. Identify collection accounts missing original creditor info
+10. Look for balance discrepancies and unauthorized amounts
+11. Identify unauthorized inquiries
+12. Check if disputed accounts are marked as such
 
 Return your analysis in the following JSON structure:
 
@@ -217,6 +263,61 @@ Return your analysis in the following JSON structure:
       "suggestedAction": "string"
     }
   ],
+  "priorityViolations": {
+    "duplicateAccounts": [
+      {
+        "originalCreditor": "string",
+        "collectionAgency": "string",
+        "accountNumber": "string (last 4 digits)",
+        "originalBalance": "string",
+        "collectionBalance": "string",
+        "explanation": "string describing the duplicate"
+      }
+    ],
+    "identityTheftAccounts": [
+      {
+        "accountName": "string",
+        "accountNumber": "string",
+        "reason": "string (why flagged as potential identity theft)",
+        "dateOpened": "string"
+      }
+    ],
+    "wrongBalanceAccounts": [
+      {
+        "accountName": "string",
+        "reportedBalance": "string",
+        "shouldBe": "string (typically $0)",
+        "status": "string (Paid/Settled)",
+        "explanation": "string"
+      }
+    ],
+    "postBankruptcyViolations": [
+      {
+        "accountName": "string",
+        "reportedBalance": "string",
+        "reportedPayment": "string",
+        "reportedPastDue": "string",
+        "bankruptcyDischargeDate": "string",
+        "explanation": "string"
+      }
+    ],
+    "cancelledDebt1099C": [
+      {
+        "accountName": "string",
+        "reportedBalance": "string",
+        "chargeOffDate": "string",
+        "explanation": "string"
+      }
+    ],
+    "tcpaViolations": [
+      {
+        "collectorName": "string",
+        "violationType": "string (robocalls/harassment/after-hours)",
+        "evidence": "string",
+        "estimatedCalls": "number"
+      }
+    ]
+  },
   "suggestedDisputeLetters": [
     {
       "targetBureau": "string (Experian/Equifax/TransUnion)",

@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, AlertTriangle, CheckCircle, Shield, FileText, Scale, Gavel, BookOpen, FileWarning, Clock } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, CheckCircle, Shield, FileText, Scale, Gavel, BookOpen, FileWarning, Clock, Copy, UserX, DollarSign, Building, Phone, AlertOctagon } from 'lucide-react';
 import { AnalysisResult } from '@/lib/analysis-schema';
 import { BookCallCTA } from '@/components/book-call-cta';
 import { useLead } from '@/lib/lead-context';
@@ -15,19 +15,19 @@ export default function AnalysisResults({ results, onReset }: AnalysisResultsPro
   const { lead, updateLead } = useLead();
 
   const getSeverityColor = (severity: string) => {
-    if (severity === 'High') return 'border-red-600 bg-red-50';
+    if (severity === 'High' || severity === 'Critical') return 'border-red-600 bg-red-50';
     if (severity === 'Medium') return 'border-yellow-500 bg-yellow-50';
     return 'border-blue-500 bg-blue-50';
   };
 
   const getSeverityBadgeColor = (severity: string) => {
-    if (severity === 'High') return 'bg-red-200 text-red-900';
+    if (severity === 'High' || severity === 'Critical') return 'bg-red-200 text-red-900';
     if (severity === 'Medium') return 'bg-yellow-200 text-yellow-900';
     return 'bg-blue-200 text-blue-900';
   };
 
   const getSeverityIcon = (severity: string) => {
-    if (severity === 'High') return <AlertTriangle className="w-5 h-5 text-red-500" />;
+    if (severity === 'High' || severity === 'Critical') return <AlertTriangle className="w-5 h-5 text-red-500" />;
     if (severity === 'Medium') return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
     return <AlertTriangle className="w-5 h-5 text-blue-500" />;
   };
@@ -41,10 +41,20 @@ export default function AnalysisResults({ results, onReset }: AnalysisResultsPro
   const fcraViolations = results?.fcraViolations ?? [];
   const fdcpaViolations = results?.fdcpaViolations ?? [];
   const debtBuyerIssues = results?.debtBuyerIssues ?? [];
+  const priorityViolations = results?.priorityViolations;
   
-  const totalViolations = results?.legalSummary?.totalViolations ?? (fcraViolations.length + fdcpaViolations.length);
+  // Count priority violations
+  const duplicateCount = priorityViolations?.duplicateAccounts?.length ?? 0;
+  const identityTheftCount = priorityViolations?.identityTheftAccounts?.length ?? 0;
+  const wrongBalanceCount = priorityViolations?.wrongBalanceAccounts?.length ?? 0;
+  const postBankruptcyCount = priorityViolations?.postBankruptcyViolations?.length ?? 0;
+  const cancelledDebtCount = priorityViolations?.cancelledDebt1099C?.length ?? 0;
+  const tcpaCount = priorityViolations?.tcpaViolations?.length ?? 0;
+  const totalPriorityViolations = duplicateCount + identityTheftCount + wrongBalanceCount + postBankruptcyCount + cancelledDebtCount + tcpaCount;
+  
+  const totalViolations = results?.legalSummary?.totalViolations ?? (fcraViolations.length + fdcpaViolations.length + totalPriorityViolations);
   const highSeverityCount = results?.legalSummary?.highSeverityCount ?? 
-    [...fcraViolations, ...fdcpaViolations].filter(v => v?.severity === 'High').length;
+    [...fcraViolations, ...fdcpaViolations].filter(v => v?.severity === 'High').length + totalPriorityViolations;
   const mediumSeverityCount = results?.legalSummary?.mediumSeverityCount ?? 
     [...fcraViolations, ...fdcpaViolations].filter(v => v?.severity === 'Medium').length;
 
@@ -52,9 +62,11 @@ export default function AnalysisResults({ results, onReset }: AnalysisResultsPro
     const basePerViolation = 1000;
     const highMultiplier = 3;
     const mediumMultiplier = 2;
+    const tcpaDamages = tcpaCount * 500; // $500-$1500 per TCPA violation
     return (highSeverityCount * basePerViolation * highMultiplier) + 
            (mediumSeverityCount * basePerViolation * mediumMultiplier) + 
-           ((totalViolations - highSeverityCount - mediumSeverityCount) * basePerViolation);
+           ((totalViolations - highSeverityCount - mediumSeverityCount) * basePerViolation) +
+           tcpaDamages;
   };
 
   const potentialDamages = calculatePotentialDamages();
@@ -164,6 +176,197 @@ export default function AnalysisResults({ results, onReset }: AnalysisResultsPro
                 <p className="text-lg font-semibold text-neutral-100">{results.reportSummary.fileSource ?? 'Unknown'}</p>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Priority Violations Section */}
+        {totalPriorityViolations > 0 && (
+          <div className="rounded-2xl bg-neutral-900/60 backdrop-blur-md border-2 border-rose-500 p-8 mb-8">
+            <div className="flex items-center gap-3 mb-6">
+              <AlertOctagon className="w-8 h-8 text-rose-400" />
+              <div>
+                <h2 className="text-2xl font-bold text-neutral-100">Priority Violations Detected</h2>
+                <p className="text-sm text-rose-300">These are the most critical issues requiring immediate attention</p>
+              </div>
+            </div>
+
+            {/* Duplicate Accounts */}
+            {duplicateCount > 0 && (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <Copy className="w-5 h-5 text-red-400" />
+                  <h3 className="text-lg font-bold text-red-400">Duplicate Account Reporting ({duplicateCount})</h3>
+                  <span className="px-2 py-1 text-xs font-bold bg-red-600 text-white rounded">HIGH SEVERITY</span>
+                </div>
+                <div className="bg-red-950/50 border-l-4 border-red-500 p-4 mb-3 rounded-r-lg">
+                  <p className="text-sm text-red-200"><strong>Legal Basis:</strong> 15 U.S.C. § 1681e(b) - Maximum Possible Accuracy</p>
+                  <p className="text-sm text-red-300 mt-1">Same debt is being reported multiple times, artificially inflating your debt.</p>
+                </div>
+                <div className="space-y-3">
+                  {priorityViolations?.duplicateAccounts?.map((dup, idx) => (
+                    <div key={idx} className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm font-semibold text-red-900">Original Creditor:</p>
+                          <p className="text-sm text-red-800">{dup.originalCreditor ?? 'Unknown'} - {dup.originalBalance ?? 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-red-900">Collection Agency:</p>
+                          <p className="text-sm text-red-800">{dup.collectionAgency ?? 'Unknown'} - {dup.collectionBalance ?? 'N/A'}</p>
+                        </div>
+                      </div>
+                      {dup.explanation && <p className="text-sm text-red-700 mt-2">{dup.explanation}</p>}
+                      <div className="mt-3 bg-blue-50 p-3 rounded border border-blue-200">
+                        <p className="text-xs font-bold text-blue-900">DISPUTE LANGUAGE:</p>
+                        <p className="text-xs text-blue-800 italic">"This account is a duplicate. The same debt is reported by both the original creditor and the collection agency, violating 15 U.S.C. § 1681e(b). Delete this duplicate entry immediately."</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Identity Theft */}
+            {identityTheftCount > 0 && (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <UserX className="w-5 h-5 text-purple-400" />
+                  <h3 className="text-lg font-bold text-purple-400">Identity Theft / Unauthorized Accounts ({identityTheftCount})</h3>
+                  <span className="px-2 py-1 text-xs font-bold bg-purple-600 text-white rounded">CRITICAL</span>
+                </div>
+                <div className="bg-purple-950/50 border-l-4 border-purple-500 p-4 mb-3 rounded-r-lg">
+                  <p className="text-sm text-purple-200"><strong>Legal Basis:</strong> 15 U.S.C. § 1681c-2 - Block of Information Resulting from Identity Theft</p>
+                  <p className="text-sm text-purple-300 mt-1">Accounts you did not open or authorize. Must be blocked within 4 business days.</p>
+                </div>
+                <div className="space-y-3">
+                  {priorityViolations?.identityTheftAccounts?.map((acct, idx) => (
+                    <div key={idx} className="bg-purple-50 border-l-4 border-purple-500 p-4 rounded-r-lg">
+                      <p className="text-sm font-semibold text-purple-900">{acct.accountName ?? 'Unknown Account'}</p>
+                      {acct.accountNumber && <p className="text-xs text-purple-700">Account #: ***{acct.accountNumber}</p>}
+                      {acct.dateOpened && <p className="text-xs text-purple-700">Opened: {acct.dateOpened}</p>}
+                      <p className="text-sm text-purple-800 mt-2">{acct.reason ?? 'Account not recognized by consumer'}</p>
+                      <div className="mt-3 bg-blue-50 p-3 rounded border border-blue-200">
+                        <p className="text-xs font-bold text-blue-900">DISPUTE LANGUAGE:</p>
+                        <p className="text-xs text-blue-800 italic">"This account is the result of identity theft. I did not open this account. Pursuant to 15 U.S.C. § 1681c-2, block and remove this fraudulent account within 4 business days."</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Wrong Balances */}
+            {wrongBalanceCount > 0 && (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <DollarSign className="w-5 h-5 text-yellow-400" />
+                  <h3 className="text-lg font-bold text-yellow-400">Incorrect Balances on Paid/Settled Accounts ({wrongBalanceCount})</h3>
+                  <span className="px-2 py-1 text-xs font-bold bg-yellow-600 text-white rounded">HIGH SEVERITY</span>
+                </div>
+                <div className="bg-yellow-950/50 border-l-4 border-yellow-500 p-4 mb-3 rounded-r-lg">
+                  <p className="text-sm text-yellow-200"><strong>Legal Basis:</strong> 15 U.S.C. § 1681e(b) / § 1681s-2(a)</p>
+                  <p className="text-sm text-yellow-300 mt-1">Paid or settled accounts must show $0 balance.</p>
+                </div>
+                <div className="space-y-3">
+                  {priorityViolations?.wrongBalanceAccounts?.map((acct, idx) => (
+                    <div key={idx} className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg">
+                      <p className="text-sm font-semibold text-yellow-900">{acct.accountName ?? 'Unknown Account'}</p>
+                      <div className="grid md:grid-cols-2 gap-2 mt-2">
+                        <p className="text-sm text-yellow-800"><strong>Reported Balance:</strong> {acct.reportedBalance ?? 'N/A'}</p>
+                        <p className="text-sm text-green-700"><strong>Should Be:</strong> {acct.shouldBe ?? '$0'}</p>
+                      </div>
+                      <p className="text-sm text-yellow-700 mt-2">Status: {acct.status ?? 'Paid'}</p>
+                      {acct.explanation && <p className="text-sm text-yellow-800 mt-1">{acct.explanation}</p>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Post-Bankruptcy Violations */}
+            {postBankruptcyCount > 0 && (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <Building className="w-5 h-5 text-blue-400" />
+                  <h3 className="text-lg font-bold text-blue-400">Post-Bankruptcy Reporting Violations ({postBankruptcyCount})</h3>
+                  <span className="px-2 py-1 text-xs font-bold bg-blue-600 text-white rounded">HIGH SEVERITY</span>
+                </div>
+                <div className="bg-blue-950/50 border-l-4 border-blue-500 p-4 mb-3 rounded-r-lg">
+                  <p className="text-sm text-blue-200"><strong>Legal Basis:</strong> 15 U.S.C. § 1681e(b) + 11 U.S.C. § 524 (Discharge Injunction)</p>
+                  <p className="text-sm text-blue-300 mt-1">Discharged accounts must show $0 balance, $0 payment, $0 past due.</p>
+                </div>
+                <div className="space-y-3">
+                  {priorityViolations?.postBankruptcyViolations?.map((acct, idx) => (
+                    <div key={idx} className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                      <p className="text-sm font-semibold text-blue-900">{acct.accountName ?? 'Unknown Account'}</p>
+                      <div className="grid md:grid-cols-3 gap-2 mt-2">
+                        <p className="text-sm text-blue-800"><strong>Balance:</strong> {acct.reportedBalance ?? 'N/A'}</p>
+                        <p className="text-sm text-blue-800"><strong>Payment:</strong> {acct.reportedPayment ?? 'N/A'}</p>
+                        <p className="text-sm text-blue-800"><strong>Past Due:</strong> {acct.reportedPastDue ?? 'N/A'}</p>
+                      </div>
+                      {acct.bankruptcyDischargeDate && (
+                        <p className="text-sm text-blue-700 mt-2">Discharge Date: {acct.bankruptcyDischargeDate}</p>
+                      )}
+                      {acct.explanation && <p className="text-sm text-blue-800 mt-1">{acct.explanation}</p>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 1099-C Cancelled Debt */}
+            {cancelledDebtCount > 0 && (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <FileWarning className="w-5 h-5 text-orange-400" />
+                  <h3 className="text-lg font-bold text-orange-400">1099-C Cancelled Debt Issues ({cancelledDebtCount})</h3>
+                  <span className="px-2 py-1 text-xs font-bold bg-orange-600 text-white rounded">HIGH SEVERITY</span>
+                </div>
+                <div className="bg-orange-950/50 border-l-4 border-orange-500 p-4 mb-3 rounded-r-lg">
+                  <p className="text-sm text-orange-200"><strong>Legal Basis:</strong> 15 U.S.C. § 1681e(b)</p>
+                  <p className="text-sm text-orange-300 mt-1">When 1099-C is issued, debt is cancelled - balance must be $0. Note: You may NOT be required to report this as taxable income.</p>
+                </div>
+                <div className="space-y-3">
+                  {priorityViolations?.cancelledDebt1099C?.map((acct, idx) => (
+                    <div key={idx} className="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-lg">
+                      <p className="text-sm font-semibold text-orange-900">{acct.accountName ?? 'Unknown Account'}</p>
+                      <p className="text-sm text-orange-800 mt-1"><strong>Reported Balance:</strong> {acct.reportedBalance ?? 'N/A'} (should be $0)</p>
+                      {acct.chargeOffDate && <p className="text-sm text-orange-700">Charge-off Date: {acct.chargeOffDate}</p>}
+                      {acct.explanation && <p className="text-sm text-orange-800 mt-1">{acct.explanation}</p>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TCPA Violations */}
+            {tcpaCount > 0 && (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <Phone className="w-5 h-5 text-green-400" />
+                  <h3 className="text-lg font-bold text-green-400">TCPA Robocall/Harassment Violations ({tcpaCount})</h3>
+                  <span className="px-2 py-1 text-xs font-bold bg-green-600 text-white rounded">$500-$1,500 PER CALL</span>
+                </div>
+                <div className="bg-green-950/50 border-l-4 border-green-500 p-4 mb-3 rounded-r-lg">
+                  <p className="text-sm text-green-200"><strong>Legal Basis:</strong> 47 U.S.C. § 227 (Telephone Consumer Protection Act)</p>
+                  <p className="text-sm text-green-300 mt-1">Each unwanted robocall or text = $500-$1,500 in damages. Document all calls!</p>
+                </div>
+                <div className="space-y-3">
+                  {priorityViolations?.tcpaViolations?.map((viol, idx) => (
+                    <div key={idx} className="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+                      <p className="text-sm font-semibold text-green-900">{viol.collectorName ?? 'Unknown Collector'}</p>
+                      <p className="text-sm text-green-800 mt-1"><strong>Type:</strong> {viol.violationType ?? 'Robocall/Harassment'}</p>
+                      {viol.evidence && <p className="text-sm text-green-700 mt-1"><strong>Evidence:</strong> {viol.evidence}</p>}
+                      {viol.estimatedCalls && (
+                        <p className="text-sm text-green-900 font-bold mt-2">
+                          Estimated Damages: ${(viol.estimatedCalls * 500).toLocaleString()} - ${(viol.estimatedCalls * 1500).toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
