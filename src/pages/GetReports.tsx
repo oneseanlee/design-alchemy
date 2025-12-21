@@ -7,8 +7,8 @@ import consumerLogo from '@/assets/consumer-logo.png';
 import experianLogo from '@/assets/experian-logo.png';
 import equifaxLogo from '@/assets/equifax-logo.png';
 import transunionLogo from '@/assets/transunion-logo.png';
+import annualCreditReportLogo from '@/assets/annualcreditreport-logo.png';
 import { SettlementsBanner } from '@/components/settlements-banner';
-
 export default function GetReports() {
   const navigate = useNavigate();
   const { lead, updateLead, isLoading } = useLead();
@@ -118,9 +118,13 @@ export default function GetReports() {
 
           {/* Important Notice */}
           <div className="bg-amber-50 rounded-2xl p-8 border border-amber-200 shadow-sm">
-            <div className="flex gap-5">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
-                <AlertCircle className="w-6 h-6 text-amber-600" />
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="flex-shrink-0 flex items-center justify-center">
+                <img 
+                  src={annualCreditReportLogo} 
+                  alt="Annual Credit Report - Authorized by Federal Law" 
+                  className="h-20 w-auto"
+                />
               </div>
               <div className="space-y-3">
                 <h3 className="text-xl font-bold text-gray-900">Important: Use AnnualCreditReport.com</h3>
