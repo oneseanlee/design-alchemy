@@ -36,12 +36,6 @@ export default function FreeEbook() {
     return () => clearInterval(timer);
   }, []);
 
-  // If already signed up, redirect to portal
-  useEffect(() => {
-    if (lead?.email && lead?.ebookDownloaded) {
-      navigate('/portal');
-    }
-  }, [lead, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
