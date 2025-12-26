@@ -35,295 +35,246 @@ const MAX_PAYLOAD_SIZE = 10 * 1024 * 1024;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 // ============================================
-// SINGLE COMPREHENSIVE PROMPT
+// STEP 1 PROMPT: Extract Data from Reports
 // ============================================
-const ANALYSIS_PROMPT = `You are a credit report analyzer for consumer-facing reporting.
+const STEP1_EXTRACT_PROMPT = `You are a credit report data extractor. Extract structured data from the credit report PDFs.
 
-GOAL
+CRITICAL: Keep your response UNDER 4000 tokens total. Be concise.
 
-From the provided credit report content, produce a single VALID JSON output that:
+RULES:
+- Mask sensitive data (only last 4 of SSN/account numbers)  
+- If information is missing, use null
+- Limit masterTradelineTable to TOP 15 accounts only (prioritize: collections, charge-offs, late payments)
+- Limit inquiries to TOP 10 most recent
+- Keep all string values SHORT (max 50 chars)
 
-1) Extracts structured credit data needed to populate a report
-
-2) Computes credit metrics with explicit math
-
-3) Flags ONLY clearly-supported potential consumer-law issues (FCRA/FDCPA/other) conservatively
-
-4) Detects potential write-off/charge-off amounts not reflected in balances (status-line checks)
-
-5) Checks balance history arithmetic for potential miscalculations (where data exists)
-
-6) Drafts dispute letters for each negative/derogatory account (one letter per account)
-
-CRITICAL OUTPUT RULES
-
-- Output VALID JSON only. No markdown, no commentary.
-
-- Keep total response under 4000 tokens.
-
-- Mask sensitive data: show ONLY last4 for SSN and account numbers.
-
-- If a field is missing or not clearly stated, use null (do not guess).
-
-- Be conservative: use the phrase "Potential issue" (never "violation").
-
-- Evidence: every flagged item MUST include "evidenceNeeded".
-
-- Limit masterTradelineTable to TOP 15 accounts (prioritize: collections, charge-offs, late pays).
-
-- Limit inquiries to TOP 10 most recent.
-
-- Final accounts[] list: MAX 10 (prioritize derogatory).
-
-- Final potentialIssues[] list: MAX 10.
-
-- Keep non-letter strings short (<= 50 chars) EXCEPT letter bodies.
-
-- Letters: include accountNumberLast4 and creditor/collector name; do not include full account numbers.
-
-- If data conflicts across bureaus/sections, record it as a mismatch instead of choosing one.
-
-MATH RULES
-
-- Show ALL math calculations in a human-readable string inside fields ending with "Calc".
-
-- If calculation is impossible due to missing fields, set metric value to null and explain briefly in the *Calc field.
-
-WRITE-OFF / STATUS-LINE CHECKS
-
-- If status/status line indicates "charged off", "written off", "profit and loss", "CO", "charge-off amount", or similar:
-
-  - Extract any write-off/charge-off amount and compare against current balance.
-
-  - If write-off amount appears separate and not included in balance OR totals don't reconcile, flag as:
-
-    "Potential issue: Write-off not reconciled" with exact text evidence.
-
-  - Never assume how furnishers report; just compare what is present.
-
-BALANCE HISTORY CHECKS
-
-- If monthly balance history is present (or payment history + balances):
-
-  - Create a timeline list (month -> balance) where possible.
-
-  - Identify any internal inconsistencies (e.g., balance increases while marked paid/closed with no explanation, impossible jumps relative to stated payment/limit).
-
-  - Do not infer interest rates. Only flag arithmetic or stated-text inconsistencies.
-
-  - If no history exists, set balanceHistoryCheck to null.
-
-DISPUTE LETTERS
-
-- Create one letter per negative account in accounts[] that is derogatory (collection, charge-off, 30/60/90+, repo, foreclosure, settled for less, etc.).
-
-- Letter must:
-
-  - Address: "To Whom It May Concern" (unless bureau/collector address is explicitly provided)
-
-  - Identify consumer as placeholders ({{ConsumerName}}, {{ConsumerAddress}}, {{CityStateZip}}, {{DOB}}, {{ReportDate}})
-
-  - Identify account: creditor/collector name, accountNumberLast4, and any bureau reference if present.
-
-  - State "I am disputing the accuracy of the information" and request investigation + verification method.
-
-  - Include a short bullet list of dispute points derived ONLY from detected potential issues or inconsistencies.
-
-  - Include "Requested outcome" (delete/correct/update) consistent with conservative framing.
-
-  - Include "Enclosures" placeholder list.
-
-- Do NOT cite laws aggressively. You may mention "my rights under the FCRA/FDCPA" but keep it restrained and conditional.
-
-RETURN EXACTLY THIS JSON STRUCTURE (keys must exist even if null)
-
+Return JSON with this structure:
 {
-  "reportSummary": {...},
-  "personalInfoMismatches": [...],
-  "inquiries": [...],
-  "publicRecords": [...],
-  "masterTradelineTable": [...],
-  "creditMetrics": {
-    "creditUtilization": {...},
-    "ageOfCredit": {...},
-    "creditMix": {...},
-    "creditHealthDiagnosis": {...}
+  "reportSummary": {
+    "reportDate": "string",
+    "consumerName": "string",
+    "totalAccountsAnalyzed": number,
+    "consumerState": "string or null",
+    "bureausAnalyzed": ["EQ", "EX", "TU"]
   },
-  "consumerLawReview": {
-    "potentialIssues": [...],
-    "categoriesSummary": {...},
-    "actionPlan": [...]
-  },
-  "finalReport": {
-    "accounts": [...],
-    "fcraViolations": [...],
-    "disputeLetters": [...]
+  "personalInfoMismatches": [
+    { "type": "string", "equifaxValue": "string", "experianValue": "string", "transunionValue": "string", "concern": "string" }
+  ],
+  "inquiries": [
+    { "date": "string", "requesterName": "string", "type": "hard/soft", "bureau": "EQ/EX/TU" }
+  ],
+  "masterTradelineTable": [
+    {
+      "furnisherName": "string",
+      "accountType": "string",
+      "openDate": "string",
+      "accountNumberLast4": "string",
+      "originalAmount": "string",
+      "perBureauData": {
+        "equifax": { "status": "string", "currentBalance": "string", "creditLimit": "string" },
+        "experian": { "status": "string", "currentBalance": "string", "creditLimit": "string" },
+        "transunion": { "status": "string", "currentBalance": "string", "creditLimit": "string" }
+      },
+      "discrepanciesNoted": ["string"]
+    }
+  ],
+  "publicRecords": {
+    "bankruptcyPresent": false,
+    "bankruptcyType": "string or null",
+    "filingDate": "string or null"
   }
-}
+}`;
 
-DETAILED FIELD SCHEMAS
+// ============================================
+// STEP 2 PROMPT: Analyze Credit Health
+// ============================================
+const STEP2_ANALYZE_PROMPT = `You are a credit health analyst. Using the extracted data provided, calculate metrics and diagnose credit health.
 
-reportSummary:
+RULES:
+- Show ALL math calculations
+- Use "Potential issue" language, never "violation"
+- Be conservative with flags
+
+Return JSON with this EXACT structure (keep response under 6000 tokens):
 {
-  "bureau": string|null,
-  "reportDate": string|null,
-  "score": number|null,
-  "scoreModel": string|null,
-  "derogatoryAccountsCount": number|null,
-  "totalAccountsCount": number|null
-}
-
-personalInfoMismatches: array of
-{
-  "field": string,
-  "valuesFound": [string],
-  "note": string
-}
-
-inquiries: array (max 10) of
-{
-  "date": string|null,
-  "creditor": string|null,
-  "type": "hard"|"soft"|null
-}
-
-publicRecords: array of
-{
-  "type": string|null,
-  "dateFiled": string|null,
-  "status": string|null,
-  "amount": number|null,
-  "court": string|null
-}
-
-masterTradelineTable: array (max 15) of
-{
-  "accountId": string, 
-  "creditorName": string|null,
-  "accountType": string|null,
-  "accountNumberLast4": string|null,
-  "bureau": string|null,
-  "openDate": string|null,
-  "status": string|null,
-  "statusLineRaw": string|null,
-  "currentBalance": number|null,
-  "creditLimit": number|null,
-  "highCredit": number|null,
-  "pastDue": number|null,
-  "paymentStatus": string|null,
-  "remarks": string|null,
-  "isDerogatory": boolean|null
-}
-
-creditMetrics.creditUtilization:
-{
-  "totalRevolvingBalance": number|null,
-  "totalRevolvingLimit": number|null,
-  "utilizationPct": number|null,
-  "utilizationCalc": string|null,
-  "notes": string|null
-}
-
-creditMetrics.ageOfCredit:
-{
-  "oldestAccountDate": string|null,
-  "newestAccountDate": string|null,
-  "averageAgeMonths": number|null,
-  "ageCalc": string|null,
-  "notes": string|null
-}
-
-creditMetrics.creditMix:
-{
-  "revolvingCount": number|null,
-  "installmentCount": number|null,
-  "mortgageCount": number|null,
-  "studentLoanCount": number|null,
-  "otherCount": number|null,
-  "notes": string|null
-}
-
-creditMetrics.creditHealthDiagnosis:
-{
-  "summary": string|null,
-  "topRiskFactors": [string],
-  "quickWins": [string]
-}
-
-consumerLawReview.potentialIssues: array (max 10) of
-{
-  "issueId": string,
-  "category": "Duplicate Reporting"|"Identity Theft"|"Wrong Balance/Status"|"Post-Bankruptcy"|"Debt Collection Red Flags"|"Legal Date/Obsolescence"| "Other",
-  "severity": "low"|"medium"|"high",
-  "accountId": string|null,
-  "whatWeSee": string,
-  "whyItMayBeAProblem": string,
-  "evidenceFromReport": [string],
-  "evidenceNeeded": [string],
-  "recommendedDisputePoints": [string],
-  "recommendedNextSteps": [string]
-}
-
-consumerLawReview.categoriesSummary:
-{
-  "Duplicate Reporting": number,
-  "Identity Theft": number,
-  "Wrong Balance/Status": number,
-  "Post-Bankruptcy": number,
-  "Debt Collection Red Flags": number,
-  "Legal Date/Obsolescence": number,
-  "Other": number
-}
-
-consumerLawReview.actionPlan: array of
-{
-  "step": number,
-  "action": string,
-  "why": string,
-  "inputsNeeded": [string]
-}
-
-finalReport.accounts: array (max 10) of
-{
-  "accountId": string,
-  "name": string|null,
-  "type": string|null,
-  "balance": number|null,
-  "status": string|null,
-  "accountNumberLast4": string|null,
-  "potentialViolation": string|null,
-  "writeOffCheck": {
-    "writeOffAmountFound": number|null,
-    "writeOffEvidenceText": string|null,
-    "balanceVsWriteOffFinding": string|null
+  "creditUtilization": {
+    "totalRevolvingBalance": number,
+    "totalRevolvingLimit": number,
+    "totalUtilization": number,
+    "totalUtilizationPercent": "string",
+    "calculationShown": "string (e.g., '$4,520 / $10,000 = 45.2%')",
+    "perCardUtilization": [
+      { "accountName": "string", "balance": number, "limit": number, "utilization": number, "utilizationPercent": "string", "flagged": boolean, "flagReason": "string", "limitMissing": boolean }
+    ],
+    "accountsMissingLimit": ["string"],
+    "flaggedThresholds": { "above30Percent": ["string"], "above50Percent": ["string"], "above90Percent": ["string"] },
+    "paydownOrder": ["string"]
   },
-  "balanceHistoryCheck": {
-    "history": [{"month": string, "balance": number|null}],
-    "finding": string|null,
-    "calc": string|null
+  "ageOfCredit": {
+    "oldestAccountAge": "string",
+    "oldestAccountName": "string",
+    "newestAccountAge": "string",
+    "newestAccountName": "string",
+    "averageAgeOfAccounts": "string",
+    "averageAgeFormula": "string",
+    "averageAgeRevolvingOnly": "string",
+    "accountsMissingOpenDate": ["string"],
+    "accountsWithOpenDates": number
+  },
+  "creditMix": {
+    "revolving": { "openCount": number, "closedCount": number, "derogatoryCount": number },
+    "installment": { "autoCount": number, "personalCount": number, "studentCount": number, "otherCount": number, "statuses": ["string"] },
+    "mortgage": { "count": number, "statuses": ["string"] },
+    "collections": { "count": number, "totalBalance": number, "totalBalanceFormatted": "string" },
+    "publicRecords": { "bankruptcyPresent": false, "bankruptcyType": "string", "filingDate": "string", "dischargeDate": "string" },
+    "mixWeaknesses": ["string"]
+  },
+  "creditHealthDiagnosis": {
+    "likelyTopSuppressors": ["string"],
+    "highUtilizationIssues": ["string"],
+    "derogatoryIssues": ["string"],
+    "thinFileIndicators": ["string"],
+    "recentInquiriesIssues": ["string"],
+    "collectionInconsistencies": ["string"]
   }
-}
+}`;
 
-finalReport.fcraViolations: array (max 10) of
+// ============================================
+// STEP 3 PROMPT: Flag Issues & Action Plan
+// ============================================
+const STEP3_FLAGS_PROMPT = `You are a consumer protection issue spotter. Review the data and analysis to flag potential FCRA/FDCPA issues and create an action plan.
+
+CRITICAL RULES:
+- Use "Potential issue" language - NEVER say "this is a violation"
+- Include "Evidence needed" for every flag
+- Be CONSERVATIVE - only flag what the report clearly supports
+
+Return JSON with this EXACT structure (keep response under 8000 tokens):
 {
-  "issueId": string,
-  "accountId": string|null,
-  "category": string,
-  "summary": string,
-  "evidenceNeeded": [string]
+  "executiveSummary": [
+    { "bullet": "string" }
+  ],
+  "sixCategoryIssueFlags": {
+    "category1_duplicateReporting": [
+      { "category": 1, "flagTypeName": "Possible Duplicate/Double Reporting", "accountsInvolved": "string", "whyFlagged": "string (≤25 words)", "evidenceNeeded": "string", "priority": "High/Med/Low" }
+    ],
+    "category2_identityTheft": [],
+    "category3_wrongBalanceStatus": [],
+    "category4_postBankruptcyMisreporting": [],
+    "category5_debtCollectionRedFlags": [],
+    "category6_legalDateObsolescence": []
+  },
+  "consumerActionPlan": {
+    "next7Days": [{ "action": "string", "priority": "High/Med/Low", "details": "string", "impactReason": "string" }],
+    "next30Days": [{ "action": "string", "priority": "High/Med/Low", "details": "string", "impactReason": "string" }],
+    "next90Days": [{ "action": "string", "priority": "High/Med/Low", "details": "string", "impactReason": "string" }],
+    "utilizationPaydownOrder": ["string"],
+    "autopayRecommendations": ["string"],
+    "avoidNewInquiries": true,
+    "disputesToFileFirst": ["string"],
+    "documentationChecklist": ["string"],
+    "questionsToAskConsumer": ["string (max 12)"]
+  },
+  "notDetectableFromReport": [
+    { "item": "string", "explanation": "string" }
+  ],
+  "legalSummary": {
+    "totalFcraViolations": number,
+    "totalFdcpaViolations": number,
+    "totalViolations": number,
+    "highSeverityCount": number,
+    "mediumSeverityCount": number,
+    "lowSeverityCount": number,
+    "attorneyReferralRecommended": true,
+    "estimatedDamagesPotential": "Low/Moderate/Significant",
+    "estimatedDamagesRange": "string"
+  },
+  "summary": "string (2-4 sentences)"
 }
 
-finalReport.disputeLetters: array of
+The 6 categories to scan for:
+1) DUPLICATE/DOUBLE REPORTING - Same debt reported twice
+2) IDENTITY THEFT INDICATORS - Unfamiliar accounts, address mismatches
+3) WRONG BALANCE/STATUS - Paid accounts showing balances
+4) POST-BANKRUPTCY MISREPORTING - Discharged debts showing owed
+5) DEBT COLLECTION RED FLAGS - Missing original creditor, inconsistent amounts
+6) LEGAL DATE/OBSOLESCENCE - Old debts, possible re-aging`;
+
+// ============================================
+// STEP 4 PROMPT: Format Final Report Template
+// ============================================
+const STEP4_FORMAT_PROMPT = `You are a JSON formatter. Convert the provided Step 1 extraction + Step 2 analysis + Step 3 flags/action plan into the EXACT JSON schema below.
+
+CRITICAL RULES:
+- Output VALID JSON only. No markdown.
+- Be conservative: use "Potential issue" language everywhere.
+- Even if field names say "violations", NEVER assert a violation. Treat them as "potential issues".
+- Include "Evidence needed:" inside the issue text for every issue entry.
+- If data is missing, use null or 0 appropriately.
+- Keep strings short (max 50 chars when possible).
+- Max 3 score factors.
+- Max 10 accounts in accounts[] (prioritize derogatory).
+- Max 10 fcraViolations[] entries (highest impact first).
+- For estimatedCompensationPotential: ALWAYS set to "Not estimable from report".
+
+MAPPING GUIDANCE:
+- creditScore.current: use reportSummary score if present.
+- creditScore.range: map score to:
+  Poor <580, Fair 580-669, Good 670-739, Excellent >=740.
+- paymentHistory:
+  - totalAccounts = count(masterTradelineTable)
+  - latePayments = sum of tradelines with any 30/60/90 late indicator
+  - missedPayments = count of charge-off/collection/120+ if clearly shown
+  - onTimePayments = totalAccounts - latePayments - missedPayments (min 0)
+  - percentageOnTime = (onTimePayments / totalAccounts)*100, round 1
+- creditUtilization: use Step 2 if available; otherwise compute from revolving.
+- accounts[]: from masterTradelineTable, include name/type/balance/status.
+  potentialViolation must be "Potential issue: ... Evidence needed: ..."
+- fcraViolations[]: derive from Step 3 sixCategoryIssueFlags.
+  violationType = category name
+  severity = High/Medium/Low based on impact + confidence
+  legalBasis = short (e.g., "FCRA accuracy", "FDCPA conduct") but never definitive
+- recommendations[]: from consumerActionPlan, prioritized.
+- legalCaseSummary:
+  - totalViolationsFound = len(fcraViolations)
+  - highPriorityViolations = count severity=="High"
+  - estimatedCompensationPotential = "Not estimable from report"
+  - attorneyReferralRecommended = true only if High issues exist
+  - nextSteps = short summary of first 3 actions
+- summary: 2-3 sentences, conservative.
+
+Return a JSON object with this structure:
 {
-  "accountId": string,
-  "creditorOrCollector": string|null,
-  "accountNumberLast4": string|null,
-  "letterType": "CRA"|"Furnisher/Collector",
-  "subject": string,
-  "body": string
-}
-
-NOW ANALYZE THE PROVIDED CREDIT REPORT CONTENT AND RETURN ONLY THE JSON.`;
+  "creditScore": {
+    "current": number or null,
+    "range": "Poor/Fair/Good/Excellent",
+    "factors": ["max 3 short factors"]
+  },
+  "paymentHistory": {
+    "onTimePayments": number,
+    "latePayments": number,
+    "missedPayments": number,
+    "totalAccounts": number,
+    "percentageOnTime": number
+  },
+  "creditUtilization": {
+    "totalCredit": number,
+    "usedCredit": number,
+    "utilizationPercentage": number,
+    "recommendation": "short recommendation"
+  },
+  "accounts": [{"name": "string", "type": "string", "balance": number, "status": "string", "potentialViolation": "string or null"}],
+  "fcraViolations": [{"violationType": "string", "severity": "High/Medium/Low", "accountName": "string", "issue": "short description", "legalBasis": "short basis"}],
+  "recommendations": [{"priority": "High/Medium/Low", "title": "string", "description": "short description"}],
+  "legalCaseSummary": {
+    "totalViolationsFound": number,
+    "highPriorityViolations": number,
+    "estimatedCompensationPotential": "string",
+    "attorneyReferralRecommended": boolean,
+    "nextSteps": "short next steps"
+  },
+  "summary": "2-3 sentence summary"
+}`;
 
 // Helper function to upload PDF to OpenAI Files API
 async function uploadPdfToOpenAI(
@@ -375,7 +326,7 @@ async function deleteOpenAIFile(apiKey: string, fileId: string): Promise<void> {
 }
 
 // Helper function to call OpenAI Responses API with a single PDF file
-async function callOpenAIWithSinglePdf(
+async function callOpenAIWithPdf(
   apiKey: string,
   systemPrompt: string,
   userPrompt: string,
@@ -403,7 +354,7 @@ async function callOpenAIWithSinglePdf(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4o-mini',  // Use mini model to reduce token usage
         input: [
           {
             role: 'user',
@@ -431,11 +382,11 @@ async function callOpenAIWithSinglePdf(
     const outputText = data.output?.find((o: { type: string }) => o.type === 'message')?.content?.find((c: { type: string }) => c.type === 'output_text')?.text;
     
     if (!outputText) {
-      console.error(`No text output in response for ${bureauName}:`, JSON.stringify(data).substring(0, 500));
+      console.error(`No text output in ${bureauName} response:`, JSON.stringify(data).substring(0, 500));
       return { success: false, error: 'Empty response from AI' };
     }
     
-    console.log(`Response text length for ${bureauName}: ${outputText.length} chars`);
+    console.log(`${bureauName} response text length: ${outputText.length} chars`);
     
     // Parse JSON
     try {
@@ -456,101 +407,73 @@ async function callOpenAIWithSinglePdf(
   }
 }
 
-// Helper function to merge multiple bureau results into one
-function mergeAnalysisResults(results: { bureau: string; data: Record<string, unknown> }[]): Record<string, unknown> {
-  if (results.length === 0) return {};
-  if (results.length === 1) return results[0].data;
-  
-  // Start with the first result as base
-  const merged: Record<string, unknown> = JSON.parse(JSON.stringify(results[0].data));
-  const allBureaus = results.map(r => r.bureau).join(', ');
-  
-  // Update reportSummary with all bureaus
-  if (merged.reportSummary && typeof merged.reportSummary === 'object') {
-    (merged.reportSummary as Record<string, unknown>).bureau = allBureaus;
+// Helper function to call OpenAI Chat Completions API (for text-only requests)
+async function callOpenAI(
+  apiKey: string, 
+  systemPrompt: string, 
+  userContent: string
+): Promise<{ success: boolean; data?: unknown; error?: string; rawResponse?: string }> {
+  try {
+    console.log(`Calling OpenAI Chat API with prompt length: ${systemPrompt.length + userContent.length} chars`);
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userContent }
+        ],
+        max_tokens: 16384,
+        temperature: 0.1,
+        response_format: { type: "json_object" }
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('OpenAI API error:', response.status, errorText);
+      return { success: false, error: `API error: ${response.status} - ${errorText}` };
+    }
+
+    const data = await response.json();
+    
+    const finishReason = data.choices?.[0]?.finish_reason;
+    console.log(`OpenAI finish reason: ${finishReason}`);
+    
+    if (finishReason === 'length') {
+      console.error('Response was truncated due to max_tokens');
+    }
+    
+    const content = data.choices?.[0]?.message?.content;
+    
+    if (!content) {
+      console.error('No content in OpenAI response:', JSON.stringify(data).substring(0, 500));
+      return { success: false, error: 'Empty response from AI' };
+    }
+
+    console.log(`Response length: ${content.length} chars`);
+
+    try {
+      const parsed = JSON.parse(content);
+      return { success: true, data: parsed };
+    } catch (parseError) {
+      console.log('JSON parse failed, attempting repair...');
+      const repaired = repairJson(content);
+      if (repaired) {
+        console.log('JSON repair successful');
+        return { success: true, data: repaired };
+      }
+      return { success: false, error: 'Failed to parse response', rawResponse: content.substring(0, 1000) };
+    }
+  } catch (error) {
+    console.error('OpenAI call error:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
-  
-  // Merge arrays from other results
-  for (let i = 1; i < results.length; i++) {
-    const other = results[i].data;
-    
-    // Merge masterTradelineTable
-    if (Array.isArray(other.masterTradelineTable)) {
-      const existing = (merged.masterTradelineTable as unknown[]) || [];
-      merged.masterTradelineTable = [...existing, ...other.masterTradelineTable].slice(0, 15);
-    }
-    
-    // Merge inquiries
-    if (Array.isArray(other.inquiries)) {
-      const existing = (merged.inquiries as unknown[]) || [];
-      merged.inquiries = [...existing, ...other.inquiries].slice(0, 10);
-    }
-    
-    // Merge publicRecords
-    if (Array.isArray(other.publicRecords)) {
-      const existing = (merged.publicRecords as unknown[]) || [];
-      merged.publicRecords = [...existing, ...other.publicRecords];
-    }
-    
-    // Merge personalInfoMismatches
-    if (Array.isArray(other.personalInfoMismatches)) {
-      const existing = (merged.personalInfoMismatches as unknown[]) || [];
-      merged.personalInfoMismatches = [...existing, ...other.personalInfoMismatches];
-    }
-    
-    // Merge consumerLawReview.potentialIssues
-    if (other.consumerLawReview && typeof other.consumerLawReview === 'object') {
-      const otherReview = other.consumerLawReview as Record<string, unknown>;
-      if (!merged.consumerLawReview) merged.consumerLawReview = {};
-      const mergedReview = merged.consumerLawReview as Record<string, unknown>;
-      
-      if (Array.isArray(otherReview.potentialIssues)) {
-        const existing = (mergedReview.potentialIssues as unknown[]) || [];
-        mergedReview.potentialIssues = [...existing, ...otherReview.potentialIssues].slice(0, 10);
-      }
-      
-      if (Array.isArray(otherReview.actionPlan)) {
-        const existing = (mergedReview.actionPlan as unknown[]) || [];
-        mergedReview.actionPlan = [...existing, ...otherReview.actionPlan];
-      }
-    }
-    
-    // Merge finalReport arrays
-    if (other.finalReport && typeof other.finalReport === 'object') {
-      const otherFinal = other.finalReport as Record<string, unknown>;
-      if (!merged.finalReport) merged.finalReport = {};
-      const mergedFinal = merged.finalReport as Record<string, unknown>;
-      
-      if (Array.isArray(otherFinal.accounts)) {
-        const existing = (mergedFinal.accounts as unknown[]) || [];
-        mergedFinal.accounts = [...existing, ...otherFinal.accounts].slice(0, 10);
-      }
-      
-      if (Array.isArray(otherFinal.fcraViolations)) {
-        const existing = (mergedFinal.fcraViolations as unknown[]) || [];
-        mergedFinal.fcraViolations = [...existing, ...otherFinal.fcraViolations].slice(0, 10);
-      }
-      
-      if (Array.isArray(otherFinal.disputeLetters)) {
-        const existing = (mergedFinal.disputeLetters as unknown[]) || [];
-        mergedFinal.disputeLetters = [...existing, ...otherFinal.disputeLetters];
-      }
-    }
-    
-    // Sum up totalAccountsCount
-    if (merged.reportSummary && other.reportSummary) {
-      const mergedSummary = merged.reportSummary as Record<string, unknown>;
-      const otherSummary = other.reportSummary as Record<string, unknown>;
-      if (typeof otherSummary.totalAccountsCount === 'number') {
-        mergedSummary.totalAccountsCount = ((mergedSummary.totalAccountsCount as number) || 0) + otherSummary.totalAccountsCount;
-      }
-      if (typeof otherSummary.derogatoryAccountsCount === 'number') {
-        mergedSummary.derogatoryAccountsCount = ((mergedSummary.derogatoryAccountsCount as number) || 0) + otherSummary.derogatoryAccountsCount;
-      }
-    }
-  }
-  
-  return merged;
 }
 
 // JSON repair function
@@ -623,7 +546,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Analyze report function called - Single-pass comprehensive analysis with OpenAI');
+    console.log('Analyze report function called - Multi-step analysis with OpenAI');
     
     // === INPUT VALIDATION: Check Content-Length header ===
     const contentLength = req.headers.get('content-length');
@@ -767,13 +690,13 @@ serve(async (req) => {
     }
 
     // Upload PDFs to OpenAI Files API
-    const uploadedFiles: { bureau: string; fileId: string }[] = [];
+    const uploadedFiles: { bureau: string; fileId: string; file: File }[] = [];
     const bureauNames: string[] = [];
     
     if (experianFile) {
       const result = await uploadPdfToOpenAI(OPENAI_API_KEY, experianFile, 'Experian');
       if (result.success && result.fileId) {
-        uploadedFiles.push({ bureau: 'Experian', fileId: result.fileId });
+        uploadedFiles.push({ bureau: 'Experian', fileId: result.fileId, file: experianFile });
         bureauNames.push('Experian');
       } else {
         console.error('Failed to upload Experian file:', result.error);
@@ -783,7 +706,7 @@ serve(async (req) => {
     if (equifaxFile) {
       const result = await uploadPdfToOpenAI(OPENAI_API_KEY, equifaxFile, 'Equifax');
       if (result.success && result.fileId) {
-        uploadedFiles.push({ bureau: 'Equifax', fileId: result.fileId });
+        uploadedFiles.push({ bureau: 'Equifax', fileId: result.fileId, file: equifaxFile });
         bureauNames.push('Equifax');
       } else {
         console.error('Failed to upload Equifax file:', result.error);
@@ -793,7 +716,7 @@ serve(async (req) => {
     if (transunionFile) {
       const result = await uploadPdfToOpenAI(OPENAI_API_KEY, transunionFile, 'TransUnion');
       if (result.success && result.fileId) {
-        uploadedFiles.push({ bureau: 'TransUnion', fileId: result.fileId });
+        uploadedFiles.push({ bureau: 'TransUnion', fileId: result.fileId, file: transunionFile });
         bureauNames.push('TransUnion');
       } else {
         console.error('Failed to upload TransUnion file:', result.error);
@@ -807,7 +730,7 @@ serve(async (req) => {
       );
     }
 
-    console.log('Starting single-pass comprehensive analysis with OpenAI,', bureauNames.length, 'PDF files uploaded');
+    console.log('Starting multi-step analysis with OpenAI,', bureauNames.length, 'PDF files uploaded');
     
     // Streaming response
     const encoder = new TextEncoder();
@@ -819,69 +742,123 @@ serve(async (req) => {
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'processing', progress, message })}\n\n`));
           };
 
-          sendProgress(10, 'PDF files uploaded to OpenAI...');
-          sendProgress(20, `Analyzing ${bureauNames.join(', ')} credit reports...`);
+          sendProgress(5, 'PDF files uploaded to OpenAI...');
 
-          // ========== SEQUENTIAL ANALYSIS OF EACH PDF ==========
-          const bureauResults: { bureau: string; data: Record<string, unknown> }[] = [];
-          const totalFiles = uploadedFiles.length;
+          // ========== STEP 1: Extract Data from each PDF separately ==========
+          const allExtractedData: Record<string, unknown>[] = [];
+          let progressBase = 8;
+          const progressPerFile = Math.floor(18 / uploadedFiles.length);
           
           for (let i = 0; i < uploadedFiles.length; i++) {
             const { bureau, fileId } = uploadedFiles[i];
-            const progressBase = 20 + (i * 50 / totalFiles);
+            sendProgress(progressBase + (i * progressPerFile), `Step 1/4: Extracting data from ${bureau} report...`);
             
-            sendProgress(progressBase, `Analyzing ${bureau} credit report (${i + 1}/${totalFiles})...`);
-            
-            const userPrompt = `Analyze this ${bureau} credit report. Extract all data, compute metrics, flag issues, check write-offs and balance history, and draft dispute letters as specified.`;
-            
-            const result = await callOpenAIWithSinglePdf(
+            const result = await callOpenAIWithPdf(
               OPENAI_API_KEY,
-              ANALYSIS_PROMPT,
-              userPrompt,
+              STEP1_EXTRACT_PROMPT,
+              `Analyze this ${bureau} credit report. Extract all tradelines, inquiries, and personal info.`,
               fileId,
               bureau
             );
             
-            // Delete the file after processing
+            if (!result.success) {
+              console.error(`Step 1 failed for ${bureau}:`, result.error);
+              // Cleanup uploaded files
+              for (const f of uploadedFiles) {
+                await deleteOpenAIFile(OPENAI_API_KEY, f.fileId);
+              }
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'error', message: `Failed to extract data from ${bureau} report. Please try again.` })}\n\n`));
+              controller.close();
+              return;
+            }
+            
+            allExtractedData.push({ bureau, data: result.data });
+            console.log(`Step 1 completed for ${bureau}`);
+            
+            // Delete file after processing to free up resources
             await deleteOpenAIFile(OPENAI_API_KEY, fileId);
-            
-            if (result.success && result.data) {
-              bureauResults.push({ bureau, data: result.data as Record<string, unknown> });
-              console.log(`Successfully analyzed ${bureau}`);
-            } else {
-              console.error(`Failed to analyze ${bureau}:`, result.error);
-            }
-            
-            // Small delay between API calls to avoid rate limits
-            if (i < uploadedFiles.length - 1) {
-              await new Promise(resolve => setTimeout(resolve, 1000));
-            }
           }
           
-          if (bureauResults.length === 0) {
-            console.error('All analyses failed');
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'error', message: 'Failed to analyze credit reports. Please try again.' })}\n\n`));
+          // Merge all extracted data
+          const extractedData = {
+            bureausAnalyzed: allExtractedData.map(d => d.bureau),
+            perBureauData: allExtractedData.reduce((acc, item) => {
+              acc[(item.bureau as string).toLowerCase()] = item.data;
+              return acc;
+            }, {} as Record<string, unknown>)
+          };
+          
+          console.log('Step 1 completed: All bureaus extracted');
+          sendProgress(28, 'Step 2/4: Analyzing credit health metrics...');
+          sendProgress(28, 'Step 2/4: Analyzing credit health metrics...');
+
+          // ========== STEP 2: Analyze Credit Health ==========
+          const step2Result = await callOpenAI(
+            OPENAI_API_KEY,
+            STEP2_ANALYZE_PROMPT,
+            `Analyze the following extracted credit report data and calculate all metrics:\n\n${JSON.stringify(extractedData, null, 2)}`
+          );
+
+          if (!step2Result.success) {
+            console.error('Step 2 failed:', step2Result.error);
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'error', message: 'Failed to analyze credit health. Please try again.' })}\n\n`));
             controller.close();
             return;
           }
 
-          sendProgress(85, 'Merging results from all bureaus...');
+          console.log('Step 2 completed: Credit health analyzed');
+          const analysisData = step2Result.data as Record<string, unknown>;
+          sendProgress(48, 'Step 3/4: Identifying issues and building action plan...');
 
-          // Merge all bureau results
-          const analysisResult = mergeAnalysisResults(bureauResults);
+          // ========== STEP 3: Flag Issues & Action Plan ==========
+          const combinedData = { ...extractedData, ...analysisData };
           
-          // Transform the result to match expected frontend schema
-          // The new schema has accounts under finalReport.accounts
+          const step3Result = await callOpenAI(
+            OPENAI_API_KEY,
+            STEP3_FLAGS_PROMPT,
+            `Review this credit report data and analysis to identify FCRA/FDCPA issues and create a consumer action plan:\n\n${JSON.stringify(combinedData, null, 2)}`
+          );
+
+          if (!step3Result.success) {
+            console.error('Step 3 failed:', step3Result.error);
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'error', message: 'Failed to generate action plan. Please try again.' })}\n\n`));
+            controller.close();
+            return;
+          }
+
+          console.log('Step 3 completed: Issues flagged and action plan created');
+          const flagsData = step3Result.data as Record<string, unknown>;
+          sendProgress(68, 'Step 4/4: Formatting final report template...');
+
+          // ========== STEP 4: Format Report Template ==========
+          const step4Result = await callOpenAI(
+            OPENAI_API_KEY,
+            STEP4_FORMAT_PROMPT,
+            `Format the following analysis data into the final report template:\n\nStep1ExtractionJSON = ${JSON.stringify(extractedData, null, 2)}\n\nStep2AnalysisJSON = ${JSON.stringify(analysisData, null, 2)}\n\nStep3FlagsJSON = ${JSON.stringify(flagsData, null, 2)}`
+          );
+
+          if (!step4Result.success) {
+            console.error('Step 4 failed:', step4Result.error);
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'error', message: 'Failed to format final report. Please try again.' })}\n\n`));
+            controller.close();
+            return;
+          }
+
+          console.log('Step 4 completed: Report formatted');
+          const formattedReport = step4Result.data as Record<string, unknown>;
+          sendProgress(92, 'Finalizing comprehensive credit audit report...');
+
+          // Files already deleted after Step 1
+
+          // ========== Merge Results ==========
           const finalResult = {
-            ...analysisResult,
-            // Ensure accounts array is accessible at top level for frontend compatibility
-            accounts: (analysisResult.finalReport as Record<string, unknown>)?.accounts ?? [],
-            masterTradelineTable: analysisResult.masterTradelineTable ?? [],
-            fcraViolations: (analysisResult.finalReport as Record<string, unknown>)?.fcraViolations ?? [],
-            disputeLetters: (analysisResult.finalReport as Record<string, unknown>)?.disputeLetters ?? []
+            ...extractedData,
+            ...analysisData,
+            ...flagsData,
+            formattedReport
           };
 
-          console.log('Comprehensive analysis completed successfully');
+          console.log('All 4 steps completed successfully');
           sendProgress(98, 'Report ready!');
           
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ status: 'completed', result: finalResult })}\n\n`));
