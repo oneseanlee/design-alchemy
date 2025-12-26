@@ -52,47 +52,57 @@ export default function LeadCaptureDialog({ open, onOpenChange, onSubmit }: Lead
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-white border-gray-200">
         <DialogHeader>
-          <DialogTitle className="text-xl">Get Your Free Credit Analysis</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-xl text-gray-900">Get Your Free Credit Analysis</DialogTitle>
+          <DialogDescription className="text-gray-600">
             Enter your details to receive your personalized FCRA violation report.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="space-y-2">
-            <Label htmlFor="lead-name">Full Name</Label>
+            <Label htmlFor="lead-name" className="text-gray-700">Full Name</Label>
             <Input
               id="lead-name"
               type="text"
               placeholder="John Doe"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className={errors.name ? 'border-destructive' : ''}
+              className={`bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 ${errors.name ? 'border-destructive' : ''}`}
             />
             {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="lead-email">Email Address</Label>
+            <Label htmlFor="lead-email" className="text-gray-700">Email Address</Label>
             <Input
               id="lead-email"
               type="email"
               placeholder="john@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={errors.email ? 'border-destructive' : ''}
+              className={`bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 ${errors.email ? 'border-destructive' : ''}`}
             />
             {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
           </div>
           <div className="flex gap-3 pt-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50">
               Cancel
             </Button>
             <Button type="submit" className="flex-1">
               Analyze My Reports
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground text-center">
+          
+          {/* Disclaimer */}
+          <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <p className="text-xs text-gray-500 leading-relaxed">
+              <strong className="text-gray-700">Disclaimer:</strong> This analysis is for informational purposes only and does not constitute legal advice. 
+              Results are generated using AI technology and should be reviewed by a qualified professional. 
+              We are not a law firm and do not provide legal representation.
+            </p>
+          </div>
+          
+          <p className="text-xs text-gray-500 text-center">
             Your information is secure and will never be shared with third parties.
           </p>
         </form>
