@@ -135,30 +135,20 @@ DISPUTE LETTERS
 
 - Do NOT cite laws aggressively. You may mention "my rights under the FCRA/FDCPA" but keep it restrained and conditional.
 
-RETURN EXACTLY THIS JSON STRUCTURE (keys must exist even if null)
+RETURN EXACTLY THIS JSON STRUCTURE (all top-level keys must exist even if null/empty)
 
 {
   "reportSummary": {...},
-  "personalInfoMismatches": [...],
-  "inquiries": [...],
-  "publicRecords": [...],
+  "executiveSummary": [...],
+  "creditUtilization": {...},
+  "ageOfCredit": {...},
+  "creditMix": {...},
   "masterTradelineTable": [...],
-  "creditMetrics": {
-    "creditUtilization": {...},
-    "ageOfCredit": {...},
-    "creditMix": {...},
-    "creditHealthDiagnosis": {...}
-  },
-  "consumerLawReview": {
-    "potentialIssues": [...],
-    "categoriesSummary": {...},
-    "actionPlan": [...]
-  },
-  "finalReport": {
-    "accounts": [...],
-    "fcraViolations": [...],
-    "disputeLetters": [...]
-  }
+  "sixCategoryIssueFlags": {...},
+  "consumerActionPlan": {...},
+  "notDetectableFromReport": [...],
+  "legalSummary": {...},
+  "summary": "..."
 }
 
 DETAILED FIELD SCHEMAS
@@ -167,161 +157,121 @@ reportSummary:
 {
   "bureau": string|null,
   "reportDate": string|null,
-  "score": number|null,
-  "scoreModel": string|null,
-  "derogatoryAccountsCount": number|null,
-  "totalAccountsCount": number|null
+  "consumerName": "Redacted",
+  "totalAccountsCount": number|null,
+  "derogatoryAccountsCount": number|null
 }
 
-personalInfoMismatches: array of
-{
-  "field": string,
-  "valuesFound": [string],
-  "note": string
-}
+executiveSummary: array of 4-6 items
+[
+  { "bullet": "Key finding 1 about the credit report" },
+  { "bullet": "Key finding 2..." },
+  ...
+]
 
-inquiries: array (max 10) of
-{
-  "date": string|null,
-  "creditor": string|null,
-  "type": "hard"|"soft"|null
-}
-
-publicRecords: array of
-{
-  "type": string|null,
-  "dateFiled": string|null,
-  "status": string|null,
-  "amount": number|null,
-  "court": string|null
-}
-
-masterTradelineTable: array (max 15) of
-{
-  "accountId": string, 
-  "creditorName": string|null,
-  "accountType": string|null,
-  "accountNumberLast4": string|null,
-  "bureau": string|null,
-  "openDate": string|null,
-  "status": string|null,
-  "statusLineRaw": string|null,
-  "currentBalance": number|null,
-  "creditLimit": number|null,
-  "highCredit": number|null,
-  "pastDue": number|null,
-  "paymentStatus": string|null,
-  "remarks": string|null,
-  "isDerogatory": boolean|null
-}
-
-creditMetrics.creditUtilization:
+creditUtilization:
 {
   "totalRevolvingBalance": number|null,
   "totalRevolvingLimit": number|null,
   "utilizationPct": number|null,
-  "utilizationCalc": string|null,
-  "notes": string|null
-}
-
-creditMetrics.ageOfCredit:
-{
-  "oldestAccountDate": string|null,
-  "newestAccountDate": string|null,
-  "averageAgeMonths": number|null,
-  "ageCalc": string|null,
-  "notes": string|null
-}
-
-creditMetrics.creditMix:
-{
-  "revolvingCount": number|null,
-  "installmentCount": number|null,
-  "mortgageCount": number|null,
-  "studentLoanCount": number|null,
-  "otherCount": number|null,
-  "notes": string|null
-}
-
-creditMetrics.creditHealthDiagnosis:
-{
-  "summary": string|null,
-  "topRiskFactors": [string],
-  "quickWins": [string]
-}
-
-consumerLawReview.potentialIssues: array (max 10) of
-{
-  "issueId": string,
-  "category": "Duplicate Reporting"|"Identity Theft"|"Wrong Balance/Status"|"Post-Bankruptcy"|"Debt Collection Red Flags"|"Legal Date/Obsolescence"| "Other",
-  "severity": "low"|"medium"|"high",
-  "accountId": string|null,
-  "whatWeSee": string,
-  "whyItMayBeAProblem": string,
-  "evidenceFromReport": [string],
-  "evidenceNeeded": [string],
-  "recommendedDisputePoints": [string],
-  "recommendedNextSteps": [string]
-}
-
-consumerLawReview.categoriesSummary:
-{
-  "Duplicate Reporting": number,
-  "Identity Theft": number,
-  "Wrong Balance/Status": number,
-  "Post-Bankruptcy": number,
-  "Debt Collection Red Flags": number,
-  "Legal Date/Obsolescence": number,
-  "Other": number
-}
-
-consumerLawReview.actionPlan: array of
-{
-  "step": number,
-  "action": string,
-  "why": string,
-  "inputsNeeded": [string]
-}
-
-finalReport.accounts: array (max 10) of
-{
-  "accountId": string,
-  "name": string|null,
-  "type": string|null,
-  "balance": number|null,
-  "status": string|null,
-  "accountNumberLast4": string|null,
-  "potentialViolation": string|null,
-  "writeOffCheck": {
-    "writeOffAmountFound": number|null,
-    "writeOffEvidenceText": string|null,
-    "balanceVsWriteOffFinding": string|null
+  "totalUtilizationPercent": "X%",
+  "utilizationCalc": "human readable calculation string",
+  "notes": string|null,
+  "perCardUtilization": [
+    {
+      "accountName": string,
+      "balance": number,
+      "limit": number,
+      "utilization": number,
+      "utilizationPercent": "X%",
+      "flagged": boolean,
+      "flagReason": string|null
+    }
+  ],
+  "flaggedThresholds": {
+    "above30Percent": [account names],
+    "above50Percent": [account names],
+    "above90Percent": [account names]
   },
-  "balanceHistoryCheck": {
-    "history": [{"month": string, "balance": number|null}],
-    "finding": string|null,
-    "calc": string|null
-  }
+  "paydownOrder": [account names in recommended order]
 }
 
-finalReport.fcraViolations: array (max 10) of
+ageOfCredit:
 {
-  "issueId": string,
-  "accountId": string|null,
-  "category": string,
-  "summary": string,
-  "evidenceNeeded": [string]
+  "oldestAccountAge": "X years Y months",
+  "oldestAccountName": string,
+  "newestAccountAge": "X years Y months",
+  "newestAccountName": string,
+  "averageAgeOfAccounts": "X years Y months",
+  "averageAgeFormula": "calculation string"
 }
 
-finalReport.disputeLetters: array of
+creditMix:
 {
-  "accountId": string,
-  "creditorOrCollector": string|null,
+  "revolvingCount": number,
+  "installmentCount": number,
+  "mortgageCount": number,
+  "collections": { "count": number, "totalBalanceFormatted": "$X" },
+  "mixWeaknesses": [strings]
+}
+
+masterTradelineTable: array (max 15) of
+{
+  "creditorName": string,
+  "accountType": string,
   "accountNumberLast4": string|null,
-  "letterType": "CRA"|"Furnisher/Collector",
-  "subject": string,
-  "body": string
+  "status": string,
+  "currentBalance": number,
+  "isDerogatory": boolean
 }
+
+sixCategoryIssueFlags:
+{
+  "category1_duplicateReporting": [
+    {
+      "accountsInvolved": "Account names",
+      "whyFlagged": "Reason",
+      "evidenceNeeded": "What evidence to gather",
+      "priority": "High"|"Med"|"Low"
+    }
+  ],
+  "category2_identityTheft": [...same structure...],
+  "category3_wrongBalanceStatus": [...same structure...],
+  "category4_postBankruptcyMisreporting": [...same structure...],
+  "category5_debtCollectionRedFlags": [...same structure...],
+  "category6_legalDateObsolescence": [...same structure...]
+}
+
+consumerActionPlan:
+{
+  "next7Days": [
+    { "action": "Action to take", "details": "More info", "priority": "High"|"Med"|"Low" }
+  ],
+  "next30Days": [...same structure...],
+  "next90Days": [...same structure...],
+  "disputesToFileFirst": ["Account 1", "Account 2"],
+  "documentationChecklist": ["Document 1", "Document 2"],
+  "questionsToAskConsumer": ["Question 1?", "Question 2?"]
+}
+
+notDetectableFromReport: array of
+[
+  { "item": "Identity theft", "explanation": "Requires police report or FTC affidavit" },
+  { "item": "Payment history accuracy", "explanation": "Needs bank statements to verify" }
+]
+
+legalSummary:
+{
+  "totalViolations": number,
+  "highSeverityCount": number,
+  "mediumSeverityCount": number,
+  "lowSeverityCount": number,
+  "estimatedDamagesPotential": "Low"|"Moderate"|"Significant",
+  "estimatedDamagesRange": "$X - $Y",
+  "attorneyReferralRecommended": boolean
+}
+
+summary: string (2-3 sentences overall assessment of the credit report)
 
 NOW ANALYZE THE PROVIDED CREDIT REPORT CONTENT AND RETURN ONLY THE JSON.`;
 
