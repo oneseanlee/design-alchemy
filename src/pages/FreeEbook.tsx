@@ -143,48 +143,49 @@ export default function FreeEbook() {
       {/* Dark overlay for readability */}
       <div className="absolute inset-0 bg-background/40 z-[1]" />
       
-      <main className="relative z-10 min-h-screen flex flex-col justify-center px-4 py-4 md:py-6">
+      <main className="relative z-10 min-h-screen flex flex-col justify-center px-3 sm:px-4 py-3 sm:py-4 md:py-6">
         <div className="w-full max-w-5xl mx-auto animate-reveal">
           
           {/* Full-width Header */}
-          <div className="text-center mb-4">
+          <div className="text-center mb-3 sm:mb-4">
             <img 
               src={breakingNewsBanner} 
               alt="Consumer Alert Breaking News" 
-              className="mx-auto mb-3 max-w-xs md:max-w-sm w-full"
+              className="mx-auto mb-2 sm:mb-3 max-w-[200px] sm:max-w-xs md:max-w-sm w-full"
             />
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight mb-2">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight mb-1 sm:mb-2 px-2">
               Get Paid Up to <span className="text-primary">$1,000</span> for Each Credit Report Error
             </h1>
           </div>
 
           {/* VSL Section with CTA */}
-          <div className="mb-6 text-center">
+          <div className="mb-4 sm:mb-6 text-center">
             <VSLPlayer 
               videoUrl="https://storage.googleapis.com/msgsndr/HAUHIKH4QhgbgKCPEnEu/media/6951d6de73a5e0dda7815d67.mp4"
               caption="Watch: FCRA Expert Ken LaMothe Reveals How to Get Compensation"
-              className="max-w-2xl mx-auto"
+              className="max-w-full sm:max-w-2xl mx-auto"
             />
             <Button 
               onClick={() => document.getElementById('signup-form')?.scrollIntoView({ behavior: 'smooth' })}
-              className="mt-4 h-12 md:h-14 px-6 md:px-8 text-base md:text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg shadow-primary/50 btn-glow"
+              className="mt-3 sm:mt-4 h-11 sm:h-12 md:h-14 px-4 sm:px-6 md:px-8 text-sm sm:text-base md:text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg shadow-primary/50 btn-glow"
             >
-              Get Your Free Guide & Analysis Now
-              <ArrowRight className="w-5 h-5 ml-2" />
+              <span className="hidden sm:inline">Get Your Free Guide & Analysis Now</span>
+              <span className="sm:hidden">Get Your Free Guide Now</span>
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
             </Button>
           </div>
 
-          {/* Two-column layout */}
-          <div id="signup-form" className="grid md:grid-cols-2 gap-6 lg:gap-10">
+          {/* Two-column layout - stacks on mobile */}
+          <div id="signup-form" className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-10">
             
-            {/* Left Column - Book Cover */}
-            <div className="flex flex-col items-center justify-center gap-6">
+            {/* Left Column - Book Cover (hidden on mobile, shown after form on small screens) */}
+            <div className="hidden md:flex flex-col items-center justify-center gap-4 sm:gap-6 order-2 md:order-1">
               {/* Urgency Timer */}
-              <div className="w-full max-w-sm bg-gradient-to-r from-destructive/90 to-primary/90 rounded-xl p-4 border border-primary/50 shadow-xl shadow-primary/30">
-                <div className="flex items-center justify-center gap-3">
-                  <Clock className="w-5 h-5 text-white animate-pulse" />
-                  <span className="text-white font-medium">Offer expires in:</span>
-                  <div className="flex gap-1 font-mono font-bold text-white text-xl">
+              <div className="w-full max-w-sm bg-gradient-to-r from-destructive/90 to-primary/90 rounded-xl p-3 sm:p-4 border border-primary/50 shadow-xl shadow-primary/30">
+                <div className="flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
+                  <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-white animate-pulse" />
+                  <span className="text-white font-medium text-sm sm:text-base">Offer expires in:</span>
+                  <div className="flex gap-1 font-mono font-bold text-white text-lg sm:text-xl">
                     <span className="bg-background/30 px-2 py-1 rounded">{String(timeLeft.minutes).padStart(2, '0')}</span>
                     <span>:</span>
                     <span className="bg-background/30 px-2 py-1 rounded">{String(timeLeft.seconds).padStart(2, '0')}</span>
@@ -197,51 +198,64 @@ export default function FreeEbook() {
                 <img 
                   src={ebookCover} 
                   alt="Free Credit Repair eBook" 
-                  className="relative w-80 md:w-96 lg:w-[420px] rounded-lg shadow-2xl transform group-hover:scale-[1.02] transition-transform duration-300"
+                  className="relative w-64 sm:w-80 md:w-96 lg:w-[420px] rounded-lg shadow-2xl transform group-hover:scale-[1.02] transition-transform duration-300"
                 />
-                <div className="absolute -top-4 -right-4 bg-destructive text-destructive-foreground text-sm font-bold px-4 py-2 rounded-full shadow-lg animate-bounce">
+                <div className="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 bg-destructive text-destructive-foreground text-xs sm:text-sm font-bold px-3 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-lg animate-bounce">
                   Free
                 </div>
               </div>
             </div>
 
-            {/* Right Column - Content & Form */}
-            <div className="flex flex-col justify-center">
-              {/* Compelling Signup Card */}
-              <div className="bg-gradient-to-br from-destructive/90 to-primary/90 rounded-2xl p-8 space-y-6 border border-primary/50 shadow-2xl shadow-primary/30">
+            {/* Right Column - Content & Form (shows first on mobile) */}
+            <div className="flex flex-col justify-center order-1 md:order-2">
+              {/* Mobile-only urgency timer */}
+              <div className="md:hidden w-full max-w-sm mx-auto mb-4 bg-gradient-to-r from-destructive/90 to-primary/90 rounded-xl p-3 border border-primary/50 shadow-xl shadow-primary/30">
+                <div className="flex items-center justify-center gap-2 flex-wrap">
+                  <Clock className="w-4 h-4 text-white animate-pulse" />
+                  <span className="text-white font-medium text-sm">Offer expires in:</span>
+                  <div className="flex gap-1 font-mono font-bold text-white text-lg">
+                    <span className="bg-background/30 px-2 py-1 rounded">{String(timeLeft.minutes).padStart(2, '0')}</span>
+                    <span>:</span>
+                    <span className="bg-background/30 px-2 py-1 rounded">{String(timeLeft.seconds).padStart(2, '0')}</span>
+                  </div>
+                </div>
+              </div>
 
-                <div className="text-center space-y-2">
-                  <h2 className="text-2xl md:text-3xl font-bold text-white">
+              {/* Compelling Signup Card */}
+              <div className="bg-gradient-to-br from-destructive/90 to-primary/90 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6 border border-primary/50 shadow-2xl shadow-primary/30">
+
+                <div className="text-center space-y-1 sm:space-y-2">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">
                     Claim Your FREE Guide
                   </h2>
-                  <p className="text-white/90">
+                  <p className="text-white/90 text-sm sm:text-base">
                     Join 10,000+ consumers who discovered hidden violations
                   </p>
                 </div>
 
                 {/* Bullet Points */}
-                <ul className="space-y-3">
-                  <li className="flex items-start gap-3">
-                    <span className="text-white font-bold mt-0.5">✓</span>
-                    <span className="text-white/90">Learn which FCRA violations qualify for <span className="text-white font-semibold">$1,000+</span> in damages</span>
+                <ul className="space-y-2 sm:space-y-3">
+                  <li className="flex items-start gap-2 sm:gap-3">
+                    <span className="text-white font-bold mt-0.5 text-sm sm:text-base">✓</span>
+                    <span className="text-white/90 text-sm sm:text-base">Learn which FCRA violations qualify for <span className="text-white font-semibold">$1,000+</span> in damages</span>
                   </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-white font-bold mt-0.5">✓</span>
-                    <span className="text-white/90">Step-by-step process to dispute errors and file claims</span>
+                  <li className="flex items-start gap-2 sm:gap-3">
+                    <span className="text-white font-bold mt-0.5 text-sm sm:text-base">✓</span>
+                    <span className="text-white/90 text-sm sm:text-base">Step-by-step process to dispute errors and file claims</span>
                   </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-white font-bold mt-0.5">✓</span>
-                    <span className="text-white/90">Get instant results from our <span className="text-white font-semibold">free AI scanner</span></span>
+                  <li className="flex items-start gap-2 sm:gap-3">
+                    <span className="text-white font-bold mt-0.5 text-sm sm:text-base">✓</span>
+                    <span className="text-white/90 text-sm sm:text-base">Get instant results from our <span className="text-white font-semibold">free AI scanner</span></span>
                   </li>
                 </ul>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                   <Input
                     type="text"
                     placeholder="Your name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="h-14 bg-white text-background placeholder:text-background/60 border-0 text-lg font-medium"
+                    className="h-12 sm:h-14 bg-white text-background placeholder:text-background/60 border-0 text-base sm:text-lg font-medium"
                     disabled={isSubmitting}
                   />
                   <Input
@@ -249,46 +263,46 @@ export default function FreeEbook() {
                     placeholder="Your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="h-14 bg-white text-background placeholder:text-background/60 border-0 text-lg font-medium"
+                    className="h-12 sm:h-14 bg-white text-background placeholder:text-background/60 border-0 text-base sm:text-lg font-medium"
                     disabled={isSubmitting}
                   />
                   <Button 
                     type="submit" 
-                    className="w-full h-14 text-xl font-bold bg-background hover:bg-background/90 text-primary"
+                    className="w-full h-12 sm:h-14 text-lg sm:text-xl font-bold bg-background hover:bg-background/90 text-primary"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
                       <>
-                        <Loader2 className="w-6 h-6 mr-2 animate-spin" />
+                        <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 mr-2 animate-spin" />
                         Processing...
                       </>
                     ) : (
                       <>
                         Get Instant Access
-                        <ArrowRight className="w-6 h-6 ml-2" />
+                        <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 ml-2" />
                       </>
                     )}
                   </Button>
                 </form>
 
                 {/* Trust badges */}
-                <div className="flex justify-center gap-6 text-sm text-white/80">
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="w-4 h-4" />
+                <div className="flex justify-center gap-3 sm:gap-6 text-xs sm:text-sm text-white/80">
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <BookOpen className="w-3 h-3 sm:w-4 sm:h-4" />
                     <span>Free eBook</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Scan className="w-4 h-4" />
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <Scan className="w-3 h-3 sm:w-4 sm:h-4" />
                     <span>AI Scan</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="w-4 h-4" />
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <CreditCard className="w-3 h-3 sm:w-4 sm:h-4" />
                     <span>No Card</span>
                   </div>
                 </div>
 
                 {/* Author credit */}
-                <p className="text-center text-sm text-white/70">
+                <p className="text-center text-xs sm:text-sm text-white/70">
                   By <span className="text-white font-medium">Ken Lamothe</span>, FCRA Expert
                 </p>
               </div>
