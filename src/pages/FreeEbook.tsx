@@ -12,6 +12,7 @@ import consumerLogo from '@/assets/consumer-logo.png';
 import { SettlementsBanner } from '@/components/settlements-banner';
 import { Link } from 'react-router-dom';
 import { z } from 'zod';
+import { VSLPlayer } from '@/components/vsl-player';
 
 // Validation schema for lead capture
 const leadSchema = z.object({
@@ -146,7 +147,7 @@ export default function FreeEbook() {
         <div className="w-full max-w-5xl mx-auto animate-reveal">
           
           {/* Full-width Header */}
-          <div className="text-center mb-10">
+          <div className="text-center mb-8">
             <img 
               src={breakingNewsBanner} 
               alt="Consumer Alert Breaking News" 
@@ -158,6 +159,15 @@ export default function FreeEbook() {
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               Discover how the Fair Credit Reporting Act entitles you to real compensation—and use our free AI scanner to find violations in minutes.
             </p>
+          </div>
+
+          {/* VSL Section */}
+          <div className="mb-10">
+            <VSLPlayer 
+              videoUrl="https://storage.googleapis.com/msgsndr/HAUHIKH4QhgbgKCPEnEu/media/6951d6de73a5e0dda7815d67.mp4"
+              caption="Watch: FCRA Expert Ken LaMothe Reveals How to Get Compensation"
+              className="max-w-3xl mx-auto"
+            />
           </div>
 
           {/* Two-column layout */}
