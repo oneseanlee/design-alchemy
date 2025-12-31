@@ -55,6 +55,36 @@ From the provided credit report content, produce a single VALID JSON output that
 
 6) Drafts dispute letters for each negative/derogatory account (one letter per account)
 
+7) CROSS-BUREAU ANALYSIS: Compare accounts across all bureaus to detect discrepancies
+
+CROSS-BUREAU DETECTION RULES (CRITICAL)
+
+For EACH account, you MUST:
+- Track which bureaus report it: "EXP" (Experian), "EQF" (Equifax), "TU" (TransUnion)
+- Compare data across bureaus for the SAME account (match by creditor name + last 4 digits)
+- Flag as "Cross-bureau Issue" if ANY of these discrepancies exist:
+  * Different balances reported across bureaus
+  * Different payment statuses (e.g., "Current" on one, "30 days late" on another)
+  * Different account statuses (e.g., "Open" vs "Closed")
+  * Account appears on some bureaus but not others (incomplete reporting)
+  * Different high credit/credit limit amounts
+  * Different dates (open date, last payment, etc.)
+- Set crossBureauIssue: true if any discrepancy is found
+- Include "Cross-bureau Issue" in violationCheck when applicable
+- Cross-bureau discrepancies are HIGH priority disputes
+
+VIOLATION CHECK CATEGORIES
+
+For each account, assign ONE of these violationCheck values (or combine if multiple apply):
+- "Clean" = No issues detected, account reporting appears accurate
+- "Duplicate" = Same debt reported by original creditor AND collector (double jeopardy)
+- "1099-C" = Cancelled/forgiven debt still showing balance (IRS 1099-C issued)
+- "Wrong Amount" = Balance doesn't match records, or unexplained increases
+- "Identity Theft" = Account not recognized/opened by consumer
+- "Post-Bankruptcy" = Discharged debt still showing balance/negative status
+- "Cross-bureau Issue" = Different data across bureaus for same account
+- Combine if multiple: "Wrong Amount / Cross-bureau Issue"
+
 CRITICAL OUTPUT RULES
 
 - Output VALID JSON only. No markdown, no commentary.
@@ -81,7 +111,7 @@ CRITICAL OUTPUT RULES
 
 - Letters: include accountNumberLast4 and creditor/collector name; do not include full account numbers.
 
-- If data conflicts across bureaus/sections, record it as a mismatch instead of choosing one.
+- If data conflicts across bureaus/sections, record it as a mismatch AND set crossBureauIssue to true.
 
 MATH RULES
 
