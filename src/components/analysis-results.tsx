@@ -708,22 +708,16 @@ export default function AnalysisResults({ results, onReset }: AnalysisResultsPro
         {(() => {
           const rawResults = results as any;
           
-          // Debug logging
-          console.log('=== Active Accounts Debug ===');
-          console.log('rawResults.accounts:', rawResults?.accounts);
-          console.log('rawResults.finalReport?.accounts:', rawResults?.finalReport?.accounts);
-          console.log('results.masterTradelineTable:', results?.masterTradelineTable);
-          console.log('results.accountAnalysis:', results?.accountAnalysis);
+          // Get accounts from various sources - check for non-empty arrays
+          const accountsSources = [
+            rawResults?.accounts,
+            rawResults?.finalReport?.accounts,
+            results?.masterTradelineTable,
+            results?.accountAnalysis,
+          ];
           
-          const rows: any[] = 
-            rawResults?.accounts ??
-            rawResults?.finalReport?.accounts ??
-            results?.masterTradelineTable ??
-            results?.accountAnalysis ??
-            [];
-          
-          console.log('Final rows array:', rows);
-          console.log('Rows length:', rows?.length);
+          // Find the first non-empty array
+          const rows: any[] = accountsSources.find(arr => Array.isArray(arr) && arr.length > 0) ?? [];
           
           if (!rows || rows.length === 0) return null;
 
