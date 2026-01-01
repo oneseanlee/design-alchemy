@@ -113,7 +113,7 @@ CRITICAL OUTPUT RULES
 
 - Keep total response under 4000 tokens.
 
-- ALWAYS EXTRACT ACCOUNT NUMBERS: For EVERY account, you MUST extract and include the accountNumberLast4 field. Look for account numbers in the PDF (usually masked like XXXX-1234 or ****5678). Extract the last 4 digits and populate accountNumberLast4. This is CRITICAL for users to identify their accounts.
+- ACCOUNT NUMBER EXTRACTION (CRITICAL): For EVERY account, extract the accountNumberLast4 field containing ONLY the visible numeric digits from the account number. Credit reports typically show partial account numbers like "****1234" or "XXXX5678". Extract ONLY the visible numeric digits (e.g., "1234" or "5678"). If the account number shows "4635XXXX2190", extract "2190". If it shows "XXXX-XXXX-1234", extract "1234". NEVER return "XXXX" or asterisks - only return the actual digits that are visible. If no numeric digits are visible at all, use null instead of masked placeholder text.
 
 - Mask sensitive data: show ONLY last4 for SSN and account numbers.
 
