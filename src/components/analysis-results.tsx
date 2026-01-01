@@ -878,6 +878,9 @@ export default function AnalysisResults({ results, onReset }: AnalysisResultsPro
                                   <span className={`font-medium ${hasIssueRow ? 'text-red-700' : 'text-gray-900'}`}>
                                     {row.name ?? row.creditorName ?? row.furnisherName ?? row.accountName ?? 'Unknown'}
                                   </span>
+                                  <span className="text-[10px] text-gray-500 font-mono mt-0.5">
+                                    {row.accountNumberLast4 ? `****${row.accountNumberLast4}` : row.accountNumber ? `****${row.accountNumber.slice(-4)}` : ''}
+                                  </span>
                                   {row.crossBureauIssue && (
                                     <span className="text-[10px] text-yellow-600 font-medium flex items-center gap-0.5 mt-0.5">
                                       <AlertTriangle className="w-2.5 h-2.5" />Cross-bureau Issue

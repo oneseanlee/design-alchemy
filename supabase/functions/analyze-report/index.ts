@@ -113,6 +113,8 @@ CRITICAL OUTPUT RULES
 
 - Keep total response under 4000 tokens.
 
+- ALWAYS EXTRACT ACCOUNT NUMBERS: For EVERY account, you MUST extract and include the accountNumberLast4 field. Look for account numbers in the PDF (usually masked like XXXX-1234 or ****5678). Extract the last 4 digits and populate accountNumberLast4. This is CRITICAL for users to identify their accounts.
+
 - Mask sensitive data: show ONLY last4 for SSN and account numbers.
 
 - If a field is missing or not clearly stated, use null (do not guess).
