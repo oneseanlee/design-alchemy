@@ -594,8 +594,8 @@ function isSameAccount(acc1: Record<string, unknown>, acc2: Record<string, unkno
   const last4_2 = getLast4Digits(acc2.accountNumberLast4 as string || acc2.accountNumber as string);
 
   // Match if creditor names are similar AND last 4 digits match
-  const creditorMatch = creditor1 && creditor2 && creditor1 === creditor2;
-  const accountMatch = last4_1 && last4_2 && last4_1 === last4_2;
+  const creditorMatch = Boolean(creditor1 && creditor2 && creditor1 === creditor2);
+  const accountMatch = Boolean(last4_1 && last4_2 && last4_1 === last4_2);
 
   return creditorMatch && accountMatch;
 }
@@ -1052,7 +1052,7 @@ serve(async (req) => {
               console.warn(`Failed to delete ${bureau} file:`, deleteError);
             }
 
-            if (result.success && result.data) {
+            if (result.success && 'data' in result && result.data) {
               bureauResults.push({ bureau, data: result.data as Record<string, unknown> });
               console.log(`Successfully analyzed ${bureau}`);
             } else {
