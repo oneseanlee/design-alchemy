@@ -99,6 +99,7 @@ const ApiTest = () => {
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let fullResponse = "";
+      let buffer = "";
 
       if (reader) {
         while (true) {
@@ -106,8 +107,28 @@ const ApiTest = () => {
           if (done) break;
           
           const chunk = decoder.decode(value, { stream: true });
-          fullResponse += chunk;
-          setCurrentResponse(fullResponse);
+          buffer += chunk;
+          
+          // Parse SSE events from buffer
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || ''; // Keep incomplete line in buffer
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              if (data === '[DONE]') {
+                fullResponse += '\n--- STREAM COMPLETE ---\n';
+              } else {
+                try {
+                  const parsed = JSON.parse(data);
+                  fullResponse += JSON.stringify(parsed, null, 2) + '\n\n';
+                } catch {
+                  fullResponse += data + '\n';
+                }
+              }
+              setCurrentResponse(fullResponse);
+            }
+          }
         }
       }
 
